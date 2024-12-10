@@ -6,7 +6,7 @@ export const meta: MetaFunction = () => {
   return [{ title: "Support the project ~ SpiritEvents.cz" }];
 };
 
-export default function Feedback() {
+export default function HowToSupport() {
   const navigate = useNavigate();
   return (
     <div className="mx-auto grid w-full max-w-7xl px-4 pb-16 pt-8 sm:px-8">

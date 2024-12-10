@@ -8,7 +8,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return { isAuthenticated: Boolean(user) };
 }
 
-export default function PagesLayout() {
+export default function GeneralLayout() {
   const { isAuthenticated } = useLoaderData<typeof loader>();
   const { pathname } = useLocation();
   return (

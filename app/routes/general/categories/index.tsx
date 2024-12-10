@@ -32,7 +32,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return { allCategories };
 }
 
-export default function Feedback() {
+export default function Categories() {
   const { allCategories } = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
   const navigate = useNavigate();
