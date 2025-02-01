@@ -1,5 +1,5 @@
 import type { Category } from "@prisma/client";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import slugify from "slugify";
 import { z } from "zod";
 import { categoryFormSchema } from "~/validations";
@@ -19,7 +19,7 @@ type Props = {
 export const CategoryFormFields = ({ errors, category }: Props) => {
   const [name, setName] = useState(category?.name ?? "");
   const [slug, setSlug] = useState(category?.slug ?? "");
-  const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSlugChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSlug(
       slugify(e.currentTarget.value, {
         lower: true,
@@ -36,7 +36,7 @@ export const CategoryFormFields = ({ errors, category }: Props) => {
       }),
     );
   };
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setName(e.currentTarget.value);
     handleSlugChange(e);
   };
@@ -45,7 +45,7 @@ export const CategoryFormFields = ({ errors, category }: Props) => {
     handleSlugBlur();
   };
   return (
-    <div className="grid gap-4 md:grid-cols-2 md:items-start">
+    <div className="md:items-start gap-4 grid md:grid-cols-2">
       <label className={`grid gap-2`}>
         <div>
           Name <span className="text-amber-600">(required)</span>
@@ -58,13 +58,13 @@ export const CategoryFormFields = ({ errors, category }: Props) => {
           onChange={handleNameChange}
           onBlur={handleNameBlur}
           value={name}
-          className="rounded border-stone-300 shadow-sm hover:shadow-md active:shadow dark:bg-stone-950"
+          className="border-stone-300 dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow rounded"
         />
         {errors?.fieldErrors.name && (
           <p className="text-red-600">{errors.fieldErrors.name.join(", ")}</p>
         )}
       </label>
-      <label className="grid gap-2">
+      <label className="gap-2 grid">
         <div>
           URL slug <span className="text-amber-600">(required)</span>
         </div>
@@ -77,7 +77,7 @@ export const CategoryFormFields = ({ errors, category }: Props) => {
           onBlur={handleSlugBlur}
           value={slug}
           placeholder="e.g. example-category"
-          className="rounded border-stone-300 text-amber-600 placeholder-stone-400 shadow-sm hover:shadow-md active:shadow dark:bg-stone-950 dark:placeholder-stone-500"
+          className="border-stone-300 dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow rounded text-amber-600 placeholder-stone-400 dark:placeholder-stone-500"
         />
         {errors?.fieldErrors.slug && (
           <p className="text-red-600">{errors.fieldErrors.slug.join(", ")}</p>

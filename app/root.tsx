@@ -1,11 +1,12 @@
-import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
-import { data, redirect } from "@remix-run/node";
+import type { LinksFunction, LoaderFunctionArgs } from "react-router";
 import {
+  data,
   isRouteErrorResponse,
   Link,
   Links,
   Meta,
   Outlet,
+  redirect,
   Scripts,
   ScrollRestoration,
   useFetchers,
@@ -14,9 +15,9 @@ import {
   useNavigation,
   useRouteError,
   useRouteLoaderData,
-} from "@remix-run/react";
+} from "react-router";
 import NProgress from "nprogress";
-import { useEffect, useMemo } from "react";
+import { ReactNode, useEffect, useMemo } from "react";
 import { toast as showToast, Toaster } from "react-hot-toast";
 import { getToast } from "remix-toast";
 import { Footer, Header } from "./components";
@@ -39,7 +40,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   }
 };
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export function Layout({ children }: { children: ReactNode }) {
   const fetchers = useFetchers();
   const navigation = useNavigation();
   const data = useRouteLoaderData<typeof loader>("root");
@@ -166,7 +167,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         />
         <Links />
       </head>
-      <body className="relative bg-white text-stone-950 dark:bg-stone-950 dark:text-white">
+      <body className="relative bg-white dark:bg-stone-950 text-stone-950 dark:text-white">
         {children}
         <Toaster
           toastOptions={{
@@ -213,13 +214,13 @@ export function ErrorBoundary() {
     </svg>
   );
   return (
-    <div className="grid min-h-lvh grid-rows-[auto_1fr_auto] bg-emerald-50 dark:bg-emerald-950">
+    <div className="grid grid-rows-[auto_1fr_auto] bg-emerald-50 dark:bg-emerald-950 min-h-lvh">
       <Header isAuthenticated={false} key={pathname} />
       <main
         className={`flex justify-center ${isRouteErrorResponse(error) && error.status === 404 ? "" : "bg-red-100 dark:bg-red-900"}`}
       >
-        <div className="grid w-full max-w-7xl px-4 pb-16 pt-8 sm:px-8">
-          <div className="grid gap-8">
+        <div className="grid px-4 sm:px-8 pt-8 pb-16 w-full max-w-7xl">
+          <div className="gap-8 grid">
             {isRouteErrorResponse(error) ? (
               error.status === 404 ? (
                 <>
@@ -272,14 +273,14 @@ export function ErrorBoundary() {
             <div className="flex justify-end gap-4">
               <Link
                 to="/"
-                className="rounded border border-transparent bg-emerald-600 px-4 py-2 text-white shadow-sm hover:shadow-md active:shadow"
+                className="bg-emerald-600 shadow-sm hover:shadow-md active:shadow px-4 py-2 border border-transparent rounded text-white"
               >
                 Go to homepage
               </Link>
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="rounded border border-emerald-600 px-4 py-2 text-emerald-600 shadow-sm hover:shadow-md active:shadow dark:border-white dark:text-white"
+                className="border-emerald-600 dark:border-white shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-emerald-600 dark:text-white"
               >
                 Back
               </button>

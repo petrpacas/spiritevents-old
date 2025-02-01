@@ -1,4 +1,4 @@
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import type { LoaderFunctionArgs, MetaFunction } from "react-router";
 import { Category, Prisma } from "@prisma/client";
 import {
   Form,
@@ -7,11 +7,11 @@ import {
   useNavigate,
   useNavigation,
   useSubmit,
-} from "@remix-run/react";
-import { useEffect, useState } from "react";
+} from "react-router";
+import { ChangeEvent, FormEvent, MouseEvent, useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { EventListCard, Select } from "~/components";
-import { authenticator, prisma } from "~/services";
+import { authenticate, prisma } from "~/services";
 import { getTodayDate, EventStatus, regions } from "~/utils";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -26,7 +26,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const requestUrl = new URL(request.url);
-  const user = await authenticator.isAuthenticated(request);
+  const user = await authenticate(request);
   const categorySlugs = requestUrl.searchParams.getAll("category");
   const past = requestUrl.searchParams.get("past");
   const region = requestUrl.searchParams.get("region");
@@ -247,13 +247,13 @@ export default function Events() {
     }
     submit(formData, { preventScrollReset: true });
   };
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
     if (e.currentTarget.form) {
       debouncedHandleSearchChange.cancel();
       handleFiltering(e.currentTarget.form);
     }
   };
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.form) {
       handleFiltering(e.target.form);
     }
@@ -262,20 +262,18 @@ export default function Events() {
     handleSearchChange,
     1000,
   );
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.form) {
       debouncedHandleSearchChange.cancel();
       handleFiltering(e.target.form);
     }
   };
-  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     debouncedHandleSearchChange.cancel();
     handleFiltering(e.currentTarget);
   };
-  const handleClearSearch = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  ) => {
+  const handleClearSearch = (e: MouseEvent<HTMLButtonElement>) => {
     if (e.currentTarget.form) {
       const formData = new FormData(e.currentTarget.form);
       if (formData.get("status") === "") {
@@ -328,12 +326,12 @@ export default function Events() {
     }
   }, [status, past, region, categorySlugs, search]);
   return (
-    <div className="mx-auto grid w-full max-w-7xl px-4 pb-16 pt-8 sm:px-8">
-      <div className="grid gap-8">
-        <div className="grid items-center gap-8">
-          <h1 className="flex items-center gap-2 text-3xl font-bold leading-snug sm:text-4xl sm:leading-snug">
+    <div className="grid mx-auto px-4 sm:px-8 pt-8 pb-16 w-full max-w-7xl">
+      <div className="gap-8 grid">
+        <div className="items-center gap-8 grid">
+          <h1 className="flex items-center gap-2 font-bold text-3xl sm:text-4xl leading-snug sm:leading-snug">
             <svg
-              className="h-8 w-8 shrink-0 text-amber-600 max-xl:hidden sm:h-10 sm:w-10"
+              className="max-xl:hidden w-8 sm:w-10 h-8 sm:h-10 text-amber-600 shrink-0"
               width="16px"
               height="16px"
               xmlns="http://www.w3.org/2000/svg"
@@ -364,9 +362,9 @@ export default function Events() {
             <Form
               onChange={() => setIsFiltering(true)}
               onSubmit={handleFormSubmit}
-              className="grid gap-4 rounded-lg border border-stone-300 bg-white p-2 sm:p-4 dark:bg-stone-950"
+              className="gap-4 border-stone-300 grid bg-white dark:bg-stone-950 p-2 sm:p-4 border rounded-lg"
             >
-              <div className="grid gap-4 lg:flex lg:items-center">
+              <div className="lg:flex lg:items-center gap-4 grid">
                 <div
                   className={`grid gap-4 lg:gap-2 ${isAuthenticated ? "sm:max-lg:grid-cols-3" : "sm:max-lg:grid-cols-2"} lg:flex`}
                 >
@@ -376,7 +374,7 @@ export default function Events() {
                       autoComplete="off"
                       name="status"
                       defaultValue={status || ""}
-                      className="custom-caret-color cursor-pointer rounded border border-stone-300 py-1 pl-2 font-semibold shadow-sm hover:shadow-md active:shadow sm:py-2 sm:pl-3 dark:bg-stone-950"
+                      className="border-stone-300 dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow custom-caret-color py-1 sm:py-2 pl-2 sm:pl-3 border rounded font-semibold cursor-pointer"
                     >
                       <option value="">Any status</option>
                       <option value="suggested">Suggested</option>
@@ -389,7 +387,7 @@ export default function Events() {
                     autoComplete="off"
                     name="past"
                     defaultValue={past || ""}
-                    className="custom-caret-color cursor-pointer rounded border border-stone-300 py-1 pl-2 font-semibold shadow-sm hover:shadow-md active:shadow sm:py-2 sm:pl-3 dark:bg-stone-950"
+                    className="border-stone-300 dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow custom-caret-color py-1 sm:py-2 pl-2 sm:pl-3 border rounded font-semibold cursor-pointer"
                   >
                     <option value="">
                       Upcoming{!isAuthenticated && " events"}
@@ -404,12 +402,12 @@ export default function Events() {
                     options={regions}
                     defaultValue={region || ""}
                     emptyOption="All regions"
-                    className="custom-caret-color cursor-pointer rounded border border-stone-300 py-1 pl-2 font-semibold shadow-sm hover:shadow-md active:shadow sm:py-2 sm:pl-3 dark:bg-stone-950"
+                    className="border-stone-300 dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow custom-caret-color py-1 sm:py-2 pl-2 sm:pl-3 border rounded font-semibold cursor-pointer"
                   />
                 </div>
-                <div className="border-stone-300 max-lg:hidden lg:h-6 lg:border-l-2" />
+                <div className="border-stone-300 max-lg:hidden lg:border-l-2 lg:h-6" />
                 <div className="flex flex-grow gap-2">
-                  <label className="grid flex-grow gap-2 sm:flex sm:items-center">
+                  <label className="sm:flex flex-grow sm:items-center gap-2 grid">
                     <span className="flex-shrink">Title search</span>
                     <input
                       onChange={debouncedHandleSearchChange}
@@ -417,13 +415,13 @@ export default function Events() {
                       type="text"
                       name="search"
                       defaultValue={search || ""}
-                      className="flex-grow rounded border border-stone-300 px-2 py-1 font-semibold shadow-sm hover:shadow-md active:shadow max-sm:w-full sm:px-3 sm:py-2 dark:bg-stone-950"
+                      className="flex-grow border-stone-300 dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow px-2 sm:px-3 py-1 sm:py-2 border rounded max-sm:w-full font-semibold"
                     />
                   </label>
                   {isFiltering ? (
-                    <div className="flex-shrink self-end rounded border border-stone-300 p-1 shadow-sm sm:p-2">
+                    <div className="flex-shrink border-stone-300 shadow-sm p-1 sm:p-2 border rounded self-end">
                       <svg
-                        className="h-6 w-6 animate-spin"
+                        className="w-6 h-6 animate-spin"
                         width="16px"
                         height="16px"
                         xmlns="http://www.w3.org/2000/svg"
@@ -442,12 +440,12 @@ export default function Events() {
                   ) : (
                     search && (
                       <button
-                        className="flex-shrink self-end rounded border border-stone-300 bg-white p-1 shadow-sm hover:shadow-md active:shadow sm:p-2 dark:bg-stone-950"
+                        className="flex-shrink border-stone-300 bg-white dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow p-1 sm:p-2 border rounded self-end"
                         type="button"
                         onClick={handleClearSearch}
                       >
                         <svg
-                          className="h-6 w-6"
+                          className="w-6 h-6"
                           width="16px"
                           height="16px"
                           xmlns="http://www.w3.org/2000/svg"
@@ -468,13 +466,13 @@ export default function Events() {
                 </div>
               </div>
               {allCategories && allCategories.length > 0 && (
-                <div className="grid gap-2 sm:flex sm:items-center">
+                <div className="sm:flex sm:items-center gap-2 grid">
                   <span className="sm:hidden">Categories</span>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="max-sm:hidden">Categories</span>
                     {allCategories.map((category) => (
                       <label
-                        className="flex cursor-pointer items-center gap-2 rounded border border-stone-300 bg-white px-2 py-1 shadow-sm hover:shadow-md active:shadow dark:bg-stone-950"
+                        className="flex items-center gap-2 border-stone-300 bg-white dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow px-2 py-1 border rounded cursor-pointer"
                         key={category.id}
                       >
                         <input
@@ -488,7 +486,7 @@ export default function Events() {
                               (categorySlug) => categorySlug === category.slug,
                             ),
                           )}
-                          className="rounded border border-stone-300 checked:bg-amber-600 hover:checked:bg-amber-600 focus:checked:bg-amber-600 dark:bg-stone-950"
+                          className="border-stone-300 hover:checked:bg-amber-600 focus:checked:bg-amber-600 dark:bg-stone-950 checked:bg-amber-600 border rounded"
                         />
                         {category.name}
                       </label>
@@ -500,16 +498,16 @@ export default function Events() {
           )}
         </div>
         {hasGroupedEvents ? (
-          <div className="grid gap-8">
+          <div className="gap-8 grid">
             {groupedEvents.map(({ year, months }) => (
-              <div className="grid gap-4" key={year}>
-                <h2 className="text-2xl font-bold leading-snug sm:text-3xl sm:leading-snug">
+              <div className="gap-4 grid" key={year}>
+                <h2 className="font-bold text-2xl sm:text-3xl leading-snug sm:leading-snug">
                   {year === "0" ? "Missing date info" : year}
                 </h2>
                 {months.map(({ month, events }) => (
-                  <div className="grid gap-4" key={`${year}_${month}`}>
+                  <div className="gap-4 grid" key={`${year}_${month}`}>
                     {month !== "0" && (
-                      <h3 className="text-xl font-bold leading-snug sm:text-2xl sm:leading-snug">
+                      <h3 className="font-bold text-xl sm:text-2xl leading-snug sm:leading-snug">
                         {new Date(`${year}-${month}`).toLocaleString("en", {
                           month: "long",
                         })}
@@ -538,21 +536,21 @@ export default function Events() {
             ))}
           </div>
         ) : (
-          <p className="justify-self-center border-y border-amber-600 py-4 text-xl italic sm:px-4 sm:py-8 sm:text-2xl">
+          <p className="justify-self-center border-amber-600 border-y sm:px-4 py-4 sm:py-8 text-xl sm:text-2xl italic">
             {categorySlugs || past || region || search || status
               ? "No events found…"
               : "No events yet…"}
           </p>
         )}
-        <div className="grid gap-8 xl:grid-cols-3 xl:gap-16">
+        <div className="gap-8 xl:gap-16 grid xl:grid-cols-3">
           {isAuthenticated ? (
             <Link
               to="/events/suggest"
-              className="flex items-center justify-center gap-3 rounded-lg border border-emerald-600 bg-emerald-600 px-4 py-2 text-lg text-white shadow-sm hover:shadow-md active:shadow sm:max-xl:justify-self-end xl:col-start-3"
+              className="flex justify-center sm:max-xl:justify-self-end items-center gap-3 border-emerald-600 xl:col-start-3 bg-emerald-600 shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded-lg text-lg text-white"
             >
               Add a new event
               <svg
-                className="h-6 w-6 max-[339px]:hidden"
+                className="max-[339px]:hidden w-6 h-6"
                 width="16px"
                 height="16px"
                 xmlns="http://www.w3.org/2000/svg"
@@ -571,11 +569,11 @@ export default function Events() {
           ) : (
             <Link
               to="/events/suggest"
-              className="flex items-center justify-center gap-3 rounded-lg border border-emerald-600 bg-emerald-600 px-4 py-2 text-lg text-white shadow-sm hover:shadow-md active:shadow sm:max-xl:justify-self-end xl:col-start-3"
+              className="flex justify-center sm:max-xl:justify-self-end items-center gap-3 border-emerald-600 xl:col-start-3 bg-emerald-600 shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded-lg text-lg text-white"
             >
               Suggest a new event
               <svg
-                className="h-6 w-6 max-[339px]:hidden"
+                className="max-[339px]:hidden w-6 h-6"
                 width="16px"
                 height="16px"
                 xmlns="http://www.w3.org/2000/svg"
@@ -597,7 +595,7 @@ export default function Events() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="rounded border border-emerald-600 px-4 py-2 text-emerald-600 shadow-sm hover:shadow-md active:shadow dark:border-white dark:text-white"
+            className="border-emerald-600 dark:border-white shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-emerald-600 dark:text-white"
           >
             Back
           </button>

@@ -1,5 +1,5 @@
-import type { MetaFunction } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
+import type { MetaFunction } from "react-router";
+import { Link, useLoaderData } from "react-router";
 import { Image } from "@unpic/react";
 import { EventListCard } from "~/components";
 import bgImage from "~/images/bg-people.jpeg";
@@ -52,12 +52,12 @@ export default function Landing() {
         <Image
           src={bgImage}
           alt=""
-          className="absolute left-0 top-0 h-full w-full object-cover"
+          className="top-0 left-0 absolute w-full h-full object-cover"
           layout="fullWidth"
           background={imagePlaceholder}
         />
-        <div className="relative grid items-center justify-center bg-emerald-50/75 dark:bg-emerald-950/75">
-          <h2 className="max-w-7xl px-4 py-16 text-center text-[1.875rem] font-bold leading-relaxed min-[375px]:text-[2rem] min-[375px]:leading-relaxed min-[414px]:text-4xl min-[414px]:leading-relaxed sm:px-8 md:text-5xl md:leading-relaxed">
+        <div className="relative justify-center items-center grid bg-emerald-50/75 dark:bg-emerald-950/75">
+          <h2 className="px-4 sm:px-8 py-16 max-w-7xl font-bold text-[1.875rem] text-center md:text-5xl min-[375px]:text-[2rem] min-[414px]:text-4xl leading-relaxed md:leading-relaxed min-[375px]:leading-relaxed min-[414px]:leading-relaxed">
             Reunite with your{" "}
             <strong className="text-emerald-600">tribe</strong>{" "}
             <br className="max-lg:hidden" /> and discover{" "}
@@ -70,12 +70,12 @@ export default function Landing() {
       </div>
       {events.length > 0 && (
         <div className="bg-transparent">
-          <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-8 sm:px-8 sm:py-16">
-            <h2 className="text-2xl leading-snug sm:text-3xl">
+          <div className="gap-8 grid mx-auto px-4 sm:px-8 py-8 sm:py-16 w-full max-w-7xl">
+            <h2 className="text-2xl sm:text-3xl leading-snug">
               ✨ Discover <strong>soulful events</strong> taking place in{" "}
               <strong>Czech Republic</strong>
             </h2>
-            <div className="grid gap-4">
+            <div className="gap-4 grid">
               {events.map((event) => (
                 <EventListCard
                   isLanding
@@ -94,17 +94,17 @@ export default function Landing() {
                 />
               ))}
             </div>
-            <div className="grid items-center gap-8 sm:max-xl:flex sm:max-xl:justify-between xl:grid-cols-3 xl:gap-16">
-              <p className="text-lg md:text-xl xl:col-span-2">
+            <div className="sm:max-xl:flex sm:max-xl:justify-between items-center gap-8 xl:gap-16 grid xl:grid-cols-3">
+              <p className="xl:col-span-2 text-lg md:text-xl">
                 and many more&hellip;
               </p>
               <Link
                 to="/events"
-                className="flex items-center justify-center gap-3 rounded-lg border border-transparent bg-emerald-600 px-4 py-2 text-lg text-white shadow-sm hover:shadow-md active:shadow sm:px-8 sm:py-4 sm:max-xl:col-start-3 sm:max-xl:justify-self-end lg:self-center"
+                className="flex justify-center sm:max-xl:justify-self-end items-center gap-3 sm:max-xl:col-start-3 bg-emerald-600 shadow-sm hover:shadow-md active:shadow px-4 sm:px-8 py-2 sm:py-4 border border-transparent rounded-lg text-lg text-white lg:self-center"
               >
                 Discover events in Czechia
                 <svg
-                  className="h-6 w-6 max-[339px]:hidden"
+                  className="max-[339px]:hidden w-6 h-6"
                   width="16px"
                   height="16px"
                   xmlns="http://www.w3.org/2000/svg"
@@ -120,15 +120,15 @@ export default function Landing() {
       )}
       <div className="grid">
         <div className="bg-emerald-100 dark:bg-emerald-900">
-          <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-8 sm:gap-16 sm:px-8 sm:py-16 xl:grid-cols-2">
-            <div className="grid gap-8 text-center">
+          <div className="gap-8 sm:gap-16 grid xl:grid-cols-2 mx-auto px-4 sm:px-8 py-8 sm:py-16 w-full max-w-7xl">
+            <div className="gap-8 grid text-center">
               <div className="text-4xl">🧿</div>
-              <h2 className="text-3xl leading-snug sm:text-4xl sm:leading-snug">
+              <h2 className="text-3xl sm:text-4xl leading-snug sm:leading-snug">
                 All the <strong>magic</strong>,
                 <br className="min-[490px]:hidden" /> all in{" "}
                 <strong>one place</strong>
               </h2>
-              <div className="grid gap-4 text-lg italic leading-snug sm:text-xl sm:leading-snug">
+              <div className="gap-4 grid text-lg sm:text-xl italic leading-snug sm:leading-snug">
                 <p>
                   The community, <br className="min-[490px]:hidden" />
                   the connections, <br className="min-[490px]:hidden" />
@@ -145,13 +145,13 @@ export default function Landing() {
                   the growth.
                 </p>
               </div>
-              <div className="-mx-4 self-end border-y border-emerald-600 px-4 py-4 text-lg italic leading-snug sm:-mx-8 sm:px-8 sm:py-8 sm:text-xl sm:leading-snug xl:-mx-0 xl:px-0">
+              <div className="border-emerald-600 border-y -mx-4 sm:-mx-8 xl:-mx-0 px-4 sm:px-8 xl:px-0 py-4 sm:py-8 text-lg sm:text-xl italic leading-snug sm:leading-snug self-end">
                 The ancient. <br className="min-[490px]:hidden" />
                 The indigenous. <br className="min-[490px]:hidden" />
                 The modern.
               </div>
             </div>
-            <div className="grid gap-4 text-lg sm:gap-8 sm:text-xl">
+            <div className="gap-4 sm:gap-8 grid text-lg sm:text-xl">
               <p>
                 We each have our own reasons why we love attending such events.
                 We all come from different places, literally and figuratively.
@@ -178,13 +178,13 @@ export default function Landing() {
           </div>
         </div>
         <div className="bg-transparent">
-          <div className="mx-auto grid w-full max-w-7xl px-4 py-8 max-xl:gap-8 sm:px-8 sm:py-16 xl:grid-cols-3 xl:gap-16">
-            <div className="grid gap-8 xl:col-span-2">
-              <h3 className="text-2xl leading-snug sm:text-3xl sm:leading-snug">
+          <div className="max-xl:gap-8 xl:gap-16 grid xl:grid-cols-3 mx-auto px-4 sm:px-8 py-8 sm:py-16 w-full max-w-7xl">
+            <div className="gap-8 grid xl:col-span-2">
+              <h3 className="text-2xl sm:text-3xl leading-snug sm:leading-snug">
                 🌀 Let&apos;s make this place a true portal{" "}
                 <strong>together</strong>
               </h3>
-              <div className="grid gap-4 text-lg sm:text-xl">
+              <div className="gap-4 grid text-lg sm:text-xl">
                 <p>
                   Do you know of any relevant event that deserves to be found by
                   like-minded people?
@@ -197,11 +197,11 @@ export default function Landing() {
             </div>
             <Link
               to="/events/suggest"
-              className="flex items-center justify-center gap-3 rounded-lg border border-emerald-600 bg-white px-4 py-2 text-lg text-emerald-600 shadow-sm hover:shadow-md active:shadow sm:px-8 sm:py-4 sm:max-xl:justify-self-end xl:self-center dark:border-white"
+              className="flex justify-center sm:max-xl:justify-self-end items-center gap-3 border-emerald-600 dark:border-white bg-white shadow-sm hover:shadow-md active:shadow px-4 sm:px-8 py-2 sm:py-4 border rounded-lg text-emerald-600 text-lg xl:self-center"
             >
               Suggest a new event
               <svg
-                className="h-6 w-6 max-[339px]:hidden"
+                className="max-[339px]:hidden w-6 h-6"
                 width="16px"
                 height="16px"
                 xmlns="http://www.w3.org/2000/svg"
@@ -220,12 +220,12 @@ export default function Landing() {
           </div>
         </div>
         <div className="bg-sky-100 dark:bg-sky-900">
-          <div className="mx-auto grid w-full max-w-7xl px-4 py-8 max-xl:gap-8 sm:px-8 sm:py-16 xl:grid-cols-3 xl:gap-16">
-            <div className="grid gap-8 xl:col-span-2">
-              <h3 className="text-2xl leading-snug sm:text-3xl sm:leading-snug">
+          <div className="max-xl:gap-8 xl:gap-16 grid xl:grid-cols-3 mx-auto px-4 sm:px-8 py-8 sm:py-16 w-full max-w-7xl">
+            <div className="gap-8 grid xl:col-span-2">
+              <h3 className="text-2xl sm:text-3xl leading-snug sm:leading-snug">
                 💫 Like what you see? Become a <strong>supporter</strong>
               </h3>
-              <div className="grid gap-4 text-lg sm:text-xl">
+              <div className="gap-4 grid text-lg sm:text-xl">
                 <p>
                   Does the idea of this portal resonate with you? Or does it
                   bring you value already? If so, consider supporting its
@@ -240,11 +240,11 @@ export default function Landing() {
             </div>
             <Link
               to="/how-to-support"
-              className="flex items-center justify-center gap-3 rounded-lg border border-transparent bg-sky-600 px-4 py-2 text-lg text-white shadow-sm hover:shadow-md active:shadow sm:px-8 sm:py-4 sm:max-xl:justify-self-end xl:self-center"
+              className="flex justify-center sm:max-xl:justify-self-end items-center gap-3 bg-sky-600 shadow-sm hover:shadow-md active:shadow px-4 sm:px-8 py-2 sm:py-4 border border-transparent rounded-lg text-lg text-white xl:self-center"
             >
               Support the project
               <svg
-                className="h-6 w-6 max-[339px]:hidden"
+                className="max-[339px]:hidden w-6 h-6"
                 width="16px"
                 height="16px"
                 xmlns="http://www.w3.org/2000/svg"

@@ -2,9 +2,9 @@ import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
   MetaFunction,
-} from "@remix-run/node";
-import { Link, useFetcher, useLoaderData, useNavigate } from "@remix-run/react";
-import { jsonWithSuccess } from "remix-toast";
+} from "react-router";
+import { Link, useFetcher, useLoaderData, useNavigate } from "react-router";
+import { dataWithSuccess } from "remix-toast";
 import { prisma, requireUserSession } from "~/services";
 
 export const meta: MetaFunction = () => {
@@ -18,7 +18,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const id = data.id;
   if (typeof id === "string") {
     await prisma.category.delete({ where: { id } });
-    return jsonWithSuccess("/categories", "Category deleted");
+    return dataWithSuccess("/categories", "Category deleted");
   }
   return null;
 }
@@ -38,11 +38,11 @@ export default function Categories() {
   const navigate = useNavigate();
   const isWorking = fetcher.state !== "idle";
   return (
-    <div className="mx-auto grid w-full max-w-7xl px-4 pb-16 pt-8 sm:px-8">
-      <div className="grid gap-8">
-        <h1 className="flex items-center gap-2 text-3xl font-bold leading-snug sm:text-4xl sm:leading-snug">
+    <div className="grid mx-auto px-4 sm:px-8 pt-8 pb-16 w-full max-w-7xl">
+      <div className="gap-8 grid">
+        <h1 className="flex items-center gap-2 font-bold text-3xl sm:text-4xl leading-snug sm:leading-snug">
           <svg
-            className="h-8 w-8 shrink-0 text-amber-600 max-xl:hidden sm:h-10 sm:w-10"
+            className="max-xl:hidden w-8 sm:w-10 h-8 sm:h-10 text-amber-600 shrink-0"
             width="16px"
             height="16px"
             xmlns="http://www.w3.org/2000/svg"
@@ -64,20 +64,18 @@ export default function Categories() {
           </svg>
           <span>All categories</span>
         </h1>
-        <div className="grid gap-4">
+        <div className="gap-4 grid">
           {allCategories.length > 0 ? (
-            <div className="grid gap-4 sm:flex sm:flex-wrap">
+            <div className="sm:flex sm:flex-wrap gap-4 grid">
               {allCategories.map((category) => (
                 <div key={category.id} className="flex">
                   <Link
                     to={`/categories/${category.id}-${category.slug}/edit`}
-                    className="flex flex-grow rounded-l border border-r-0 border-emerald-600 bg-white p-2 shadow-sm hover:shadow-md active:shadow dark:bg-stone-950"
+                    className="flex flex-grow border-emerald-600 bg-white dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow p-2 border border-r-0 rounded-l"
                   >
-                    <div className="grid gap-2 sm:flex sm:flex-grow">
+                    <div className="sm:flex sm:flex-grow gap-2 grid">
                       <span className="font-semibold">{category.name}</span>
-                      <span className="text-amber-600">
-                        [{category.slug}]
-                      </span>{" "}
+                      <span className="text-amber-600">[{category.slug}]</span>{" "}
                       <span className="text-stone-400">
                         ({category._count.events}x)
                       </span>
@@ -100,10 +98,10 @@ export default function Categories() {
                       type="submit"
                       name="id"
                       value={category.id}
-                      className="rounded-r border border-red-600 bg-red-600 px-2 text-white shadow-sm hover:shadow-md active:shadow disabled:opacity-50"
+                      className="bg-red-600 disabled:opacity-50 shadow-sm hover:shadow-md active:shadow px-2 border border-red-600 rounded-r text-white"
                     >
                       <svg
-                        className="h-6 w-6"
+                        className="w-6 h-6"
                         width="16px"
                         height="16px"
                         xmlns="http://www.w3.org/2000/svg"
@@ -124,21 +122,21 @@ export default function Categories() {
               ))}
             </div>
           ) : (
-            <p className="justify-self-center border-y border-amber-600 py-4 text-xl italic sm:px-4 sm:py-8 sm:text-2xl">
+            <p className="justify-self-center border-amber-600 border-y sm:px-4 py-4 sm:py-8 text-xl sm:text-2xl italic">
               No category yet&hellip;
             </p>
           )}
           <div className="flex justify-end gap-4">
             <Link
               to="/categories/new"
-              className="rounded border border-emerald-600 bg-emerald-600 px-4 py-2 text-white shadow-sm hover:shadow-md active:shadow disabled:opacity-50"
+              className="border-emerald-600 bg-emerald-600 disabled:opacity-50 shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-white"
             >
               New
             </Link>
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="rounded border border-emerald-600 px-4 py-2 text-emerald-600 shadow-sm hover:shadow-md active:shadow disabled:opacity-50 dark:border-white dark:text-white"
+              className="border-emerald-600 dark:border-white disabled:opacity-50 shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-emerald-600 dark:text-white"
             >
               Back
             </button>

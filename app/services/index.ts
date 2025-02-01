@@ -1,14 +1,16 @@
-import { authenticator } from "./auth.server";
-import prisma from "./db.server";
 import {
+  authenticator,
+  authenticate,
   commitSession,
   destroySession,
   getSession,
   requireUserSession,
-} from "./session.server";
+} from "./auth.server";
+import prisma from "./db.server";
 
 export {
   authenticator,
+  authenticate,
   commitSession,
   destroySession,
   getSession,

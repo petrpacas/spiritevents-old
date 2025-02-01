@@ -1,6 +1,6 @@
 import type { MDXEditorMethods } from "@mdxeditor/editor";
 import type { Category, Prisma } from "@prisma/client";
-import type { RefObject } from "react";
+import type { ChangeEvent, RefObject } from "react";
 import { useState } from "react";
 import { ClientOnly } from "remix-utils/client-only";
 import slugify from "slugify";
@@ -58,7 +58,7 @@ export const EventFormFields = ({
       }),
     );
   };
-  const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSlugChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSlugModified(true);
     setSlug(
       slugify(e.currentTarget.value, {
@@ -76,7 +76,7 @@ export const EventFormFields = ({
       }),
     );
   };
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTitleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setTitle(e.currentTarget.value);
     if (isSlugFreelyModifiable) {
       handleSlugChange(e);
@@ -87,7 +87,7 @@ export const EventFormFields = ({
     handleSlugBlur();
   };
   return (
-    <div className="grid gap-4 md:grid-cols-2 md:items-start">
+    <div className="md:items-start gap-4 grid md:grid-cols-2">
       <label className={`grid gap-2 ${isSuggesting ? "md:col-span-2" : ""}`}>
         <span>
           Title <span className="text-amber-600">(required)</span>
@@ -100,14 +100,14 @@ export const EventFormFields = ({
           onChange={handleTitleChange}
           onBlur={handleTitleBlur}
           value={title}
-          className="rounded border-stone-300 shadow-sm hover:shadow-md active:shadow dark:bg-stone-950"
+          className="border-stone-300 dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow rounded"
         />
         {errors?.fieldErrors.title && (
           <p className="text-red-600">{errors.fieldErrors.title.join(", ")}</p>
         )}
       </label>
       {!isSuggesting && (
-        <label className="grid gap-2">
+        <label className="gap-2 grid">
           <span>
             URL slug{" "}
             <span className="text-amber-600">
@@ -134,7 +134,7 @@ export const EventFormFields = ({
           )}
         </label>
       )}
-      <label className="grid gap-2 md:col-span-1">
+      <label className="gap-2 grid md:col-span-1">
         <span>
           Region <span className="text-amber-600">(required)</span>
         </span>
@@ -144,13 +144,13 @@ export const EventFormFields = ({
           emptyOption={event?.region ? undefined : "— select a region —"}
           defaultValue={event?.region || ""}
           name="region"
-          className="custom-caret-color w-full cursor-pointer rounded border-stone-300 shadow-sm invalid:text-stone-400 hover:shadow-md active:shadow dark:bg-stone-950 dark:invalid:text-stone-500"
+          className="border-stone-300 dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow custom-caret-color rounded w-full dark:invalid:text-stone-500 invalid:text-stone-400 cursor-pointer"
         />
         {errors?.fieldErrors.region && (
           <p className="text-red-600">{errors.fieldErrors.region.join(", ")}</p>
         )}
       </label>
-      <label className="grid gap-2">
+      <label className="gap-2 grid">
         <span>
           Location <span className="text-amber-600">(required)</span>
         </span>
@@ -161,7 +161,7 @@ export const EventFormFields = ({
           name="location"
           defaultValue={event?.location}
           placeholder="venue, city, general area, etc."
-          className="rounded border-stone-300 placeholder-stone-400 shadow-sm hover:shadow-md active:shadow dark:bg-stone-950 dark:placeholder-stone-500"
+          className="border-stone-300 dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow rounded placeholder-stone-400 dark:placeholder-stone-500"
         />
         {errors?.fieldErrors.location && (
           <p className="text-red-600">
@@ -170,12 +170,12 @@ export const EventFormFields = ({
         )}
       </label>
       {categories && categories.length > 0 && (
-        <div className="grid gap-2 md:col-span-2">
+        <div className="gap-2 grid md:col-span-2">
           Categories
-          <div className="flex flex-wrap gap-4 rounded-lg border border-stone-300 bg-white p-4 dark:bg-stone-950">
+          <div className="flex flex-wrap gap-4 border-stone-300 bg-white dark:bg-stone-950 p-4 border rounded-lg">
             {categories.map((category) => (
               <label
-                className="flex cursor-pointer items-center gap-2 rounded border border-stone-300 px-4 py-2 shadow-sm hover:shadow-md active:shadow dark:bg-stone-950"
+                className="flex items-center gap-2 border-stone-300 dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded cursor-pointer"
                 key={category.id}
               >
                 <input
@@ -188,7 +188,7 @@ export const EventFormFields = ({
                       (eventCategory) => eventCategory.id === category.id,
                     ),
                   )}
-                  className="rounded border border-stone-300 checked:bg-amber-600 hover:checked:bg-amber-600 focus:checked:bg-amber-600 dark:bg-stone-950"
+                  className="border-stone-300 hover:checked:bg-amber-600 focus:checked:bg-amber-600 dark:bg-stone-950 checked:bg-amber-600 border rounded"
                 />
                 {category.name}
               </label>
@@ -201,7 +201,7 @@ export const EventFormFields = ({
           )}
         </div>
       )}
-      <label className="grid gap-2 md:col-span-1">
+      <label className="gap-2 grid md:col-span-1">
         Start date
         <div className="flex">
           <input
@@ -224,14 +224,14 @@ export const EventFormFields = ({
           {dateStartState && (
             <button
               type="button"
-              className="rounded-r border border-l-0 border-stone-300 bg-white px-2 dark:bg-stone-950"
+              className="border-stone-300 bg-white dark:bg-stone-950 px-2 border border-l-0 rounded-r"
               onClick={(e) => {
                 e.preventDefault();
                 setDateStart("");
               }}
             >
               <svg
-                className="h-6 w-6"
+                className="w-6 h-6"
                 width="16px"
                 height="16px"
                 xmlns="http://www.w3.org/2000/svg"
@@ -255,7 +255,7 @@ export const EventFormFields = ({
           </p>
         )}
       </label>
-      <label className="grid gap-2 md:col-span-1">
+      <label className="gap-2 grid md:col-span-1">
         End date
         <div className="flex">
           <input
@@ -278,14 +278,14 @@ export const EventFormFields = ({
           {dateEndState && (
             <button
               type="button"
-              className="rounded-r border border-l-0 border-stone-300 bg-white px-2 dark:bg-stone-950"
+              className="border-stone-300 bg-white dark:bg-stone-950 px-2 border border-l-0 rounded-r"
               onClick={(e) => {
                 e.preventDefault();
                 setDateEnd("");
               }}
             >
               <svg
-                className="h-6 w-6"
+                className="w-6 h-6"
                 width="16px"
                 height="16px"
                 xmlns="http://www.w3.org/2000/svg"
@@ -309,7 +309,7 @@ export const EventFormFields = ({
           </p>
         )}
       </label>
-      <label className="grid gap-2">
+      <label className="gap-2 grid">
         Start time
         <div className="flex">
           <input
@@ -341,14 +341,14 @@ export const EventFormFields = ({
           {timeStartState && (
             <button
               type="button"
-              className="rounded-r border border-l-0 border-stone-300 bg-white px-2 dark:bg-stone-950"
+              className="border-stone-300 bg-white dark:bg-stone-950 px-2 border border-l-0 rounded-r"
               onClick={(e) => {
                 e.preventDefault();
                 setTimeStart("");
               }}
             >
               <svg
-                className="h-6 w-6"
+                className="w-6 h-6"
                 width="16px"
                 height="16px"
                 xmlns="http://www.w3.org/2000/svg"
@@ -372,7 +372,7 @@ export const EventFormFields = ({
           </p>
         )}
       </label>
-      <label className="grid gap-2">
+      <label className="gap-2 grid">
         End time
         <div className="flex">
           <input
@@ -404,14 +404,14 @@ export const EventFormFields = ({
           {timeEndState && (
             <button
               type="button"
-              className="rounded-r border border-l-0 border-stone-300 bg-white px-2 dark:bg-stone-950"
+              className="border-stone-300 bg-white dark:bg-stone-950 px-2 border border-l-0 rounded-r"
               onClick={(e) => {
                 e.preventDefault();
                 setTimeEnd("");
               }}
             >
               <svg
-                className="h-6 w-6"
+                className="w-6 h-6"
                 width="16px"
                 height="16px"
                 xmlns="http://www.w3.org/2000/svg"
@@ -435,14 +435,14 @@ export const EventFormFields = ({
           </p>
         )}
       </label>
-      <label className="grid gap-2">
+      <label className="gap-2 grid">
         Website link
         <input
           autoComplete="off"
           type="text"
           name="linkWebsite"
           defaultValue={event?.linkWebsite}
-          className="rounded border-stone-300 shadow-sm hover:shadow-md active:shadow dark:bg-stone-950"
+          className="border-stone-300 dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow rounded"
         />
         {errors?.fieldErrors.linkWebsite && (
           <p className="text-red-600">
@@ -450,14 +450,14 @@ export const EventFormFields = ({
           </p>
         )}
       </label>
-      <label className="grid gap-2">
+      <label className="gap-2 grid">
         Tickets link
         <input
           autoComplete="off"
           type="text"
           name="linkTickets"
           defaultValue={event?.linkTickets}
-          className="rounded border-stone-300 shadow-sm hover:shadow-md active:shadow dark:bg-stone-950"
+          className="border-stone-300 dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow rounded"
         />
         {errors?.fieldErrors.linkTickets && (
           <p className="text-red-600">
@@ -465,14 +465,14 @@ export const EventFormFields = ({
           </p>
         )}
       </label>
-      <label className="grid gap-2">
+      <label className="gap-2 grid">
         FB event link
         <input
           autoComplete="off"
           type="text"
           name="linkFbEvent"
           defaultValue={event?.linkFbEvent}
-          className="rounded border-stone-300 shadow-sm hover:shadow-md active:shadow dark:bg-stone-950"
+          className="border-stone-300 dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow rounded"
         />
         {errors?.fieldErrors.linkFbEvent && (
           <p className="text-red-600">
@@ -480,14 +480,14 @@ export const EventFormFields = ({
           </p>
         )}
       </label>
-      <label className="grid gap-2">
+      <label className="gap-2 grid">
         Location link
         <input
           autoComplete="off"
           type="text"
           name="linkLocation"
           defaultValue={event?.linkLocation}
-          className="rounded border-stone-300 shadow-sm hover:shadow-md active:shadow dark:bg-stone-950"
+          className="border-stone-300 dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow rounded"
         />
         {errors?.fieldErrors.linkLocation && (
           <p className="text-red-600">
@@ -497,7 +497,7 @@ export const EventFormFields = ({
       </label>
       <ClientOnly
         fallback={
-          <label className="grid gap-2 md:col-span-2">
+          <label className="gap-2 grid md:col-span-2">
             <div>
               Description{" "}
               <span className="text-amber-600">~ loading editor&hellip;</span>
@@ -506,7 +506,7 @@ export const EventFormFields = ({
               name="description"
               readOnly
               defaultValue={event?.description}
-              className="min-h-20 rounded border-stone-300 shadow-sm read-only:bg-stone-300 hover:shadow-md active:shadow dark:read-only:bg-stone-700"
+              className="border-stone-300 dark:read-only:bg-stone-700 read-only:bg-stone-300 shadow-sm hover:shadow-md active:shadow rounded min-h-20"
             />
             {errors?.fieldErrors.description && (
               <p className="text-red-600">
@@ -517,11 +517,11 @@ export const EventFormFields = ({
         }
       >
         {() => (
-          <div className="grid gap-2 md:col-span-2">
+          <div className="gap-2 grid md:col-span-2">
             Description
             <DescriptionEditor
               ref={mdxEditorRef}
-              className="overflow-x-auto rounded border border-stone-300 bg-white shadow-sm hover:shadow-md active:shadow dark:bg-stone-950"
+              className="border-stone-300 bg-white dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow border rounded overflow-x-auto"
               markdown={event?.description}
             />
             {errors?.fieldErrors.description && (

@@ -1,3 +1,5 @@
+import type { ChangeEventHandler } from "react";
+
 type Options = {
   name: string;
   code: string;
@@ -11,7 +13,7 @@ type Props = {
   emptyOption?: string;
   name?: string;
   required?: boolean;
-  onChange?: React.ChangeEventHandler<HTMLSelectElement>;
+  onChange?: ChangeEventHandler<HTMLSelectElement>;
 };
 
 export const Select = ({

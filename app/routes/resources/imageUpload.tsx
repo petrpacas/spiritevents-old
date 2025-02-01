@@ -1,9 +1,16 @@
-import type { ActionFunctionArgs } from "@remix-run/node";
-import { useFetcher } from "@remix-run/react";
+import type { ActionFunctionArgs } from "react-router";
+import { useFetcher } from "react-router";
 import { blurhashToCssGradientString } from "@unpic/placeholder";
 import { Image } from "@unpic/react";
-import { useEffect, useRef, useState } from "react";
-import { jsonWithError, jsonWithSuccess } from "remix-toast";
+import {
+  ChangeEvent,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { dataWithError, dataWithSuccess } from "remix-toast";
 import sharp from "sharp";
 import { requireUserSession } from "~/services";
 import { deleteFileFromB2, uploadFileToB2 } from "~/utils/b2s3Functions.server";
@@ -15,10 +22,10 @@ type Props = {
   imageBlurHash?: string;
   imageId?: string;
   imageKey?: string;
-  onBlurHashChange?: React.Dispatch<React.SetStateAction<string>>;
-  onFileChange: React.Dispatch<React.SetStateAction<boolean>>;
-  onIdChange?: React.Dispatch<React.SetStateAction<string>>;
-  onKeyChange?: React.Dispatch<React.SetStateAction<string>>;
+  onBlurHashChange?: Dispatch<SetStateAction<string>>;
+  onFileChange: Dispatch<SetStateAction<boolean>>;
+  onIdChange?: Dispatch<SetStateAction<string>>;
+  onKeyChange?: Dispatch<SetStateAction<string>>;
 };
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -34,20 +41,20 @@ export async function action({ request }: ActionFunctionArgs) {
     case "delete":
       return handleDelete(formData, eventId);
     default:
-      return jsonWithError(null, "Unknown action", { status: 400 });
+      return dataWithError(null, "Unknown action", { status: 400 });
   }
 }
 
 async function handleUpload(formData: FormData, eventId?: string) {
   const image = formData.get("image") as File | null;
   if (!image || image.size === 0) {
-    return jsonWithError(null, "No file selected", { status: 400 });
+    return dataWithError(null, "No file selected", { status: 400 });
   }
   if (!image.type.startsWith("image/")) {
-    return jsonWithError(null, "File isn't an image", { status: 400 });
+    return dataWithError(null, "File isn't an image", { status: 400 });
   }
   if (image.size > 10485760) {
-    return jsonWithError(null, "File size is too large (max. 10 MB)", {
+    return dataWithError(null, "File size is too large (max. 10 MB)", {
       status: 400,
     });
   }
@@ -64,7 +71,7 @@ async function handleUpload(formData: FormData, eventId?: string) {
     blurHash,
   );
   if (blurHash && response?.id && response?.key) {
-    return jsonWithSuccess(
+    return dataWithSuccess(
       {
         imageBlurHash: blurHash,
         imageId: response.id,
@@ -74,21 +81,21 @@ async function handleUpload(formData: FormData, eventId?: string) {
       { status: 200 },
     );
   }
-  return jsonWithError(null, "Upload was unsuccessful", { status: 500 });
+  return dataWithError(null, "Upload was unsuccessful", { status: 500 });
 }
 
 async function handleDelete(formData: FormData, eventId?: string) {
   const imageId = formData.get("imageId")?.toString();
   const imageKey = formData.get("imageKey")?.toString();
   if (!imageKey) {
-    return jsonWithError(null, "No key present", { status: 400 });
+    return dataWithError(null, "No key present", { status: 400 });
   }
   await deleteFileFromB2(
     `${eventId ? "events" : "temp"}/${imageKey}`,
     `${imageId}`,
     eventId,
   );
-  return jsonWithSuccess(
+  return dataWithSuccess(
     { imageBlurHash: "", imageId: "", imageKey: "" },
     "Image deleted!",
   );
@@ -136,11 +143,11 @@ export const ImageUpload = ({
     ? blurhashToCssGradientString(imageBlurHashState)
     : undefined;
   const isWorking = disabled || fetcher.state !== "idle";
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     onFileChange((e.target.files && e.target.files.length > 0) || false);
   };
   return (
-    <div className="grid gap-2">
+    <div className="gap-2 grid">
       <span>
         Cover image{" "}
         {!imageKeyState && <span className="text-amber-600">(max. 10 MB)</span>}
@@ -150,7 +157,7 @@ export const ImageUpload = ({
         encType="multipart/form-data"
         method="post"
         ref={formRef}
-        className="grid gap-4 rounded-lg border border-emerald-600 bg-white p-4 dark:bg-stone-950"
+        className="gap-4 border-emerald-600 grid bg-white dark:bg-stone-950 p-4 border rounded-lg"
         onSubmit={
           imageKeyState
             ? (e) => {
@@ -168,13 +175,13 @@ export const ImageUpload = ({
         <input type="hidden" name="imageBlurHash" value={imageBlurHashState} />
         <input type="hidden" name="imageId" value={imageIdState} />
         <input type="hidden" name="imageKey" value={imageKeyState} />
-        <div className="grid gap-4 md:flex">
+        <div className="md:flex gap-4 grid">
           {imageKeyState ? (
             <>
               <Image
                 src={imageUrl}
                 alt=""
-                className="mx-auto max-h-96 w-full max-w-96 rounded border border-stone-300"
+                className="border-stone-300 mx-auto border rounded w-full max-w-96 max-h-96"
                 layout="fullWidth"
                 background={imagePlaceholder}
               />
@@ -183,7 +190,7 @@ export const ImageUpload = ({
                 type="submit"
                 name="intent"
                 value="delete"
-                className="rounded border border-transparent bg-red-600 px-4 py-2 text-white shadow-sm hover:shadow-md active:shadow disabled:opacity-50"
+                className="bg-red-600 disabled:opacity-50 shadow-sm hover:shadow-md active:shadow px-4 py-2 border border-transparent rounded text-white"
               >
                 Remove image
               </button>
@@ -197,7 +204,7 @@ export const ImageUpload = ({
                 type="file"
                 name="image"
                 accept="image/*"
-                className="m-0 w-full cursor-pointer rounded border border-stone-300 p-0 pr-3 shadow-sm file:m-0 file:mr-3 file:h-[42px] file:cursor-pointer file:rounded-l-sm file:rounded-r-none file:border-0 file:bg-stone-300 file:p-0 file:px-3 file:text-base file:text-stone-950 invalid:text-stone-400 hover:shadow-md active:shadow sm:flex-1 dark:bg-stone-950 dark:[color-scheme:dark] dark:invalid:text-stone-500"
+                className="sm:flex-1 border-stone-300 file:border-0 dark:bg-stone-950 file:bg-stone-300 shadow-sm hover:shadow-md active:shadow m-0 file:m-0 file:mr-3 file:px-3 p-0 file:p-0 pr-3 border rounded file:rounded-l-sm file:rounded-r-none w-full file:h-[42px] dark:invalid:text-stone-500 file:text-base file:text-stone-950 invalid:text-stone-400 cursor-pointer file:cursor-pointer dark:[color-scheme:dark]"
               />
               <button
                 id="imageUploadButton"
@@ -205,14 +212,14 @@ export const ImageUpload = ({
                 type="submit"
                 name="intent"
                 value="upload"
-                className="rounded border border-transparent bg-emerald-600 px-4 py-2 text-white shadow-sm hover:shadow-md active:shadow disabled:opacity-50"
+                className="bg-emerald-600 disabled:opacity-50 shadow-sm hover:shadow-md active:shadow px-4 py-2 border border-transparent rounded text-white"
               >
                 Upload image
               </button>
               <button
                 disabled={isWorking}
                 type="button"
-                className="rounded border border-emerald-600 bg-transparent px-4 py-2 text-emerald-600 shadow-sm hover:shadow-md active:shadow disabled:opacity-50 dark:border-white dark:text-white"
+                className="border-emerald-600 dark:border-white bg-transparent disabled:opacity-50 shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-emerald-600 dark:text-white"
                 onClick={() => {
                   const el = document.getElementById("fileInput");
                   if (el && el instanceof HTMLInputElement) {

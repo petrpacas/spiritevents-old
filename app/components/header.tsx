@@ -1,4 +1,4 @@
-import { Link, useNavigation } from "@remix-run/react";
+import { Link, useNavigation } from "react-router";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { ClientOnly } from "remix-utils/client-only";
@@ -24,7 +24,7 @@ export const Header = ({ isAuthenticated, isLanding }: Props) => {
     }
   }, [navigation]);
   const brandName = (
-    <div className="relative z-10 font-bold leading-none max-[319px]:grid max-[319px]:text-[1.3125rem] min-[320px]:text-[1.75rem] min-[374px]:text-[2.1815rem] min-[428px]:text-[2.625rem]">
+    <div className="relative z-10 max-[319px]:grid font-bold max-[319px]:text-[1.3125rem] min-[320px]:text-[1.75rem] min-[374px]:text-[2.1815rem] min-[428px]:text-[2.625rem] leading-none">
       <span className="text-emerald-600">Spirit</span>
       <span>Events</span>
     </div>
@@ -32,7 +32,7 @@ export const Header = ({ isAuthenticated, isLanding }: Props) => {
   return (
     <>
       <header className="bg-white dark:bg-stone-950">
-        <div className="relative mx-auto flex w-full max-w-7xl items-center justify-between p-4 sm:px-8">
+        <div className="relative flex justify-between items-center mx-auto sm:px-8 p-4 w-full max-w-7xl">
           <Link to="/">{isLanding ? <h1>{brandName}</h1> : brandName}</Link>
           <button
             type="button"
@@ -41,7 +41,7 @@ export const Header = ({ isAuthenticated, isLanding }: Props) => {
           >
             <span className="sr-only">Menu</span>
             <svg
-              className="h-6 w-6"
+              className="w-6 h-6"
               width="16px"
               height="16px"
               xmlns="http://www.w3.org/2000/svg"
@@ -65,14 +65,14 @@ export const Header = ({ isAuthenticated, isLanding }: Props) => {
           >
             <Link
               to="/events"
-              className="flex items-center gap-2 rounded border border-emerald-600 bg-emerald-600 px-4 py-2 text-white shadow-sm hover:shadow-md active:shadow max-md:justify-center"
+              className="flex max-md:justify-center items-center gap-2 border-emerald-600 bg-emerald-600 shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-white"
             >
               <span>
                 Discover
                 <span className="md:max-lg:sr-only"> events</span>
               </span>
               <svg
-                className="h-6 w-6"
+                className="w-6 h-6"
                 width="16px"
                 height="16px"
                 xmlns="http://www.w3.org/2000/svg"
@@ -86,14 +86,14 @@ export const Header = ({ isAuthenticated, isLanding }: Props) => {
               <>
                 <Link
                   to="/events/new"
-                  className="flex items-center gap-2 rounded border border-emerald-600 bg-white px-4 py-2 text-emerald-600 shadow-sm hover:shadow-md active:shadow max-md:justify-center dark:border-white"
+                  className="flex max-md:justify-center items-center gap-2 border-emerald-600 dark:border-white bg-white shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-emerald-600"
                 >
                   <span>
                     New
                     <span className="md:max-lg:sr-only"> event</span>
                   </span>
                   <svg
-                    className="h-6 w-6"
+                    className="w-6 h-6"
                     width="16px"
                     height="16px"
                     xmlns="http://www.w3.org/2000/svg"
@@ -111,11 +111,11 @@ export const Header = ({ isAuthenticated, isLanding }: Props) => {
                 </Link>
                 <Link
                   to="/categories"
-                  className="flex items-center gap-2 rounded border border-sky-600 bg-sky-600 px-4 py-2 text-white shadow-sm hover:shadow-md active:shadow max-md:justify-center"
+                  className="flex max-md:justify-center items-center gap-2 border-sky-600 bg-sky-600 shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-white"
                 >
                   <span>Categories</span>
                   <svg
-                    className="h-6 w-6"
+                    className="w-6 h-6"
                     width="16px"
                     height="16px"
                     xmlns="http://www.w3.org/2000/svg"
@@ -141,14 +141,14 @@ export const Header = ({ isAuthenticated, isLanding }: Props) => {
               <>
                 <Link
                   to="/events/suggest"
-                  className="flex items-center gap-2 rounded border border-emerald-600 bg-white px-4 py-2 text-emerald-600 shadow-sm hover:shadow-md active:shadow max-md:justify-center dark:border-white"
+                  className="flex max-md:justify-center items-center gap-2 border-emerald-600 dark:border-white bg-white shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-emerald-600"
                 >
                   <span>
                     Suggest
                     <span className="md:max-lg:sr-only"> event</span>
                   </span>
                   <svg
-                    className="h-6 w-6"
+                    className="w-6 h-6"
                     width="16px"
                     height="16px"
                     xmlns="http://www.w3.org/2000/svg"
@@ -166,14 +166,14 @@ export const Header = ({ isAuthenticated, isLanding }: Props) => {
                 </Link>
                 <Link
                   to="/how-to-support"
-                  className="flex items-center gap-2 rounded border border-sky-600 bg-sky-600 px-4 py-2 text-white shadow-sm hover:shadow-md active:shadow max-md:justify-center"
+                  className="flex max-md:justify-center items-center gap-2 border-sky-600 bg-sky-600 shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-white"
                 >
                   <span>
                     Support
                     <span className="md:max-lg:sr-only"> project</span>
                   </span>
                   <svg
-                    className="h-6 w-6"
+                    className="w-6 h-6"
                     width="16px"
                     height="16px"
                     xmlns="http://www.w3.org/2000/svg"

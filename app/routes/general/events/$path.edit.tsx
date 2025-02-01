@@ -4,8 +4,8 @@ import type {
   LinksFunction,
   LoaderFunctionArgs,
   MetaFunction,
-} from "@remix-run/node";
-import { redirect } from "@remix-run/node";
+} from "react-router";
+import { redirect } from "react-router";
 import {
   Form,
   useActionData,
@@ -13,9 +13,9 @@ import {
   useNavigate,
   useNavigation,
   useSubmit,
-} from "@remix-run/react";
-import { useRef, useState } from "react";
-import { jsonWithError, redirectWithSuccess } from "remix-toast";
+} from "react-router";
+import { FormEvent, useRef, useState } from "react";
+import { dataWithError, redirectWithSuccess } from "remix-toast";
 import {
   descriptionEditorStyles,
   EventFormFields,
@@ -39,7 +39,7 @@ export async function action({ params, request }: ActionFunctionArgs) {
   const status = data.originStatus;
   const result = eventFormSchema.safeParse(data);
   if (!result.success) {
-    return jsonWithError(result.error.flatten(), "Please fix the errors");
+    return dataWithError(result.error.flatten(), "Please fix the errors");
   }
   const categoryIds: string[] = result.data.categories;
   delete result.data.categories;
@@ -101,7 +101,7 @@ export default function EventEdit() {
   const [imageIdState, setImageIdState] = useState(event.imageId);
   const [imageKeyState, setImageKeyState] = useState(event.imageKey);
   const submit = useSubmit();
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const $form = e.currentTarget;
     const formData = new FormData($form);
@@ -133,11 +133,11 @@ export default function EventEdit() {
     submit(formData, { method: "POST", replace: true });
   };
   return (
-    <div className="mx-auto grid w-full max-w-7xl px-4 pb-16 pt-8 sm:px-8">
-      <div className="grid gap-8">
-        <h1 className="flex items-center gap-2 text-3xl font-bold leading-snug sm:text-4xl sm:leading-snug">
+    <div className="grid mx-auto px-4 sm:px-8 pt-8 pb-16 w-full max-w-7xl">
+      <div className="gap-8 grid">
+        <h1 className="flex items-center gap-2 font-bold text-3xl sm:text-4xl leading-snug sm:leading-snug">
           <svg
-            className="h-8 w-8 shrink-0 text-amber-600 max-xl:hidden sm:h-10 sm:w-10"
+            className="max-xl:hidden w-8 sm:w-10 h-8 sm:h-10 text-amber-600 shrink-0"
             width="16px"
             height="16px"
             xmlns="http://www.w3.org/2000/svg"
@@ -154,7 +154,7 @@ export default function EventEdit() {
           </svg>
           <span>Editing {event.title}</span>
         </h1>
-        <div className="grid gap-4">
+        <div className="gap-4 grid">
           <ImageUpload
             disabled={navigation.state !== "idle"}
             eventId={event.id}
@@ -168,7 +168,7 @@ export default function EventEdit() {
           />
           <Form onSubmit={handleSubmit}>
             <fieldset
-              className="grid gap-4"
+              className="gap-4 grid"
               disabled={navigation.state !== "idle"}
             >
               <input
@@ -196,7 +196,7 @@ export default function EventEdit() {
                 {fileSelected ? (
                   <button
                     type="button"
-                    className="rounded border border-emerald-600 bg-white px-4 py-2 text-emerald-600 shadow-sm hover:shadow-md active:shadow disabled:opacity-50"
+                    className="border-emerald-600 bg-white disabled:opacity-50 shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-emerald-600"
                     onClick={() => {
                       const el = document.getElementById("imageUploadButton");
                       if (el) {
@@ -216,7 +216,7 @@ export default function EventEdit() {
                 ) : (
                   <button
                     type="submit"
-                    className="rounded border border-transparent bg-emerald-600 px-4 py-2 text-white shadow-sm hover:shadow-md active:shadow disabled:opacity-50"
+                    className="bg-emerald-600 disabled:opacity-50 shadow-sm hover:shadow-md active:shadow px-4 py-2 border border-transparent rounded text-white"
                   >
                     Save
                   </button>
@@ -224,7 +224,7 @@ export default function EventEdit() {
                 <button
                   type="button"
                   onClick={() => navigate(-1)}
-                  className="rounded border border-emerald-600 px-4 py-2 text-emerald-600 shadow-sm hover:shadow-md active:shadow disabled:opacity-50 dark:border-white dark:text-white"
+                  className="border-emerald-600 dark:border-white disabled:opacity-50 shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-emerald-600 dark:text-white"
                 >
                   Back
                 </button>

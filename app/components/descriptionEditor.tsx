@@ -1,4 +1,4 @@
-import type { LinksFunction } from "@remix-run/node";
+import type { LinksFunction } from "react-router";
 import type { MDXEditorMethods } from "@mdxeditor/editor";
 import type { ForwardedRef } from "react";
 import { forwardRef } from "react";

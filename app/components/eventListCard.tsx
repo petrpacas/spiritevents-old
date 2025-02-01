@@ -1,5 +1,5 @@
 import { Category } from "@prisma/client";
-import { Link } from "@remix-run/react";
+import { Link } from "react-router";
 import { blurhashToCssGradientString } from "@unpic/placeholder";
 import { Image } from "@unpic/react";
 import React from "react";
@@ -56,11 +56,11 @@ export const EventListCard = ({
       className={`${statusBg} ${imageKey ? "sm:relative sm:flex" : ""} group grid rounded-lg border border-emerald-600 shadow-sm hover:shadow-md active:shadow`}
     >
       {imageKey && (
-        <div className="bottom-0 left-0 top-0 opacity-75 group-hover:opacity-100 group-focus:opacity-100 max-sm:h-32 sm:absolute sm:w-[25%] lg:w-[20%]">
+        <div className="top-0 bottom-0 left-0 sm:absolute opacity-75 group-hover:opacity-100 group-focus:opacity-100 sm:w-[25%] lg:w-[20%] max-sm:h-32">
           <Image
             src={`${import.meta.env.VITE_B2_CDN_ALIAS}/events/${imageKey}`}
             alt=""
-            className="h-full w-full object-cover max-sm:rounded-t-[0.4375rem] sm:rounded-l-[0.4375rem]"
+            className="max-sm:rounded-t-[0.4375rem] sm:rounded-l-[0.4375rem] w-full h-full object-cover"
             layout="fullWidth"
             background={imagePlaceholder}
           />
@@ -70,16 +70,16 @@ export const EventListCard = ({
         className={`${imageKey ? "flex-grow sm:ml-[25%] lg:ml-[20%]" : ""} grid gap-2 p-2 sm:p-4`}
       >
         {isLanding ? (
-          <h3 className="text-xl font-medium leading-snug sm:text-2xl sm:leading-snug">
+          <h3 className="font-medium text-xl sm:text-2xl leading-snug sm:leading-snug">
             {headingContent}
           </h3>
         ) : (
-          <h4 className="text-xl font-medium leading-snug sm:text-2xl sm:leading-snug">
+          <h4 className="font-medium text-xl sm:text-2xl leading-snug sm:leading-snug">
             {headingContent}
           </h4>
         )}
         {categories.length > 0 && (
-          <div className="flex flex-wrap gap-x-2 leading-snug sm:text-lg sm:leading-snug">
+          <div className="flex flex-wrap gap-x-2 sm:text-lg leading-snug sm:leading-snug">
             {categories.map((category, idx) => (
               <React.Fragment key={category.id}>
                 {idx !== 0 && <span className="opacity-50">&amp;</span>}
@@ -88,13 +88,13 @@ export const EventListCard = ({
             ))}
           </div>
         )}
-        <div className="grid gap-2 leading-snug sm:text-lg sm:leading-snug lg:flex lg:items-end lg:justify-between lg:gap-4">
-          <div className="grid min-[400px]:flex min-[400px]:gap-2">
+        <div className="lg:flex lg:justify-between lg:items-end gap-2 lg:gap-4 grid sm:text-lg leading-snug sm:leading-snug">
+          <div className="min-[400px]:flex min-[400px]:gap-2 grid">
             {dateStart ? (
               <>
                 <div className="flex items-start gap-2">
                   <svg
-                    className="h-5 w-5 text-amber-600 sm:h-6 sm:w-6"
+                    className="w-5 sm:w-6 h-5 sm:h-6 text-amber-600"
                     width="16px"
                     height="16px"
                     xmlns="http://www.w3.org/2000/svg"
@@ -114,7 +114,7 @@ export const EventListCard = ({
                 {dateEnd && dateEnd !== dateStart ? (
                   <div className="flex items-start gap-2">
                     <svg
-                      className="h-5 w-5 rotate-90 opacity-50 sm:h-6 sm:w-6"
+                      className="opacity-50 w-5 sm:w-6 h-5 sm:h-6 rotate-90"
                       width="16px"
                       height="16px"
                       xmlns="http://www.w3.org/2000/svg"
@@ -135,7 +135,7 @@ export const EventListCard = ({
                   timeStart && (
                     <div className="flex items-start gap-2">
                       <svg
-                        className="h-5 w-5 text-amber-600 sm:h-6 sm:w-6"
+                        className="w-5 sm:w-6 h-5 sm:h-6 text-amber-600"
                         width="16px"
                         height="16px"
                         xmlns="http://www.w3.org/2000/svg"
@@ -154,7 +154,7 @@ export const EventListCard = ({
                       {timeEnd && (
                         <>
                           <svg
-                            className="h-5 w-5 rotate-90 opacity-50 sm:h-6 sm:w-6"
+                            className="opacity-50 w-5 sm:w-6 h-5 sm:h-6 rotate-90"
                             width="16px"
                             height="16px"
                             xmlns="http://www.w3.org/2000/svg"

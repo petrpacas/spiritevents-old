@@ -2,96 +2,110 @@ import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
   MetaFunction,
-} from "@remix-run/node";
-import { data } from "@remix-run/node";
+} from "react-router";
 import {
+  data,
+  redirect,
   Form,
-  useLoaderData,
   useNavigate,
   useNavigation,
-} from "@remix-run/react";
-import { authenticator, commitSession, getSession } from "~/services";
+  useLoaderData,
+} from "react-router";
+import {
+  authenticator,
+  commitSession,
+  getSession,
+} from "~/services/auth.server";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Sign in ~ SpiritEvents.cz" }];
 };
 
 export async function action({ request }: ActionFunctionArgs) {
+  const session = await getSession(request.headers.get("cookie"));
   const requestUrl = new URL(request.url);
   const originRoute = requestUrl.searchParams.get("originRoute");
-  return await authenticator.authenticate("FormStrategy", request, {
-    failureRedirect: originRoute
+
+  try {
+    const user = await authenticator.authenticate("FormStrategy", request);
+    session.set("user", user);
+    return redirect(originRoute || "/", {
+      headers: { "Set-Cookie": await commitSession(session) },
+    });
+  } catch (error: any) {
+    session.flash("authError", error.message || "Authentication failed");
+    const signInPath = originRoute
       ? `/sign-in?originRoute=${originRoute}`
-      : "/sign-in",
-    successRedirect: originRoute || "/events",
-  });
+      : "/sign-in";
+    return redirect(signInPath, {
+      headers: { "Set-Cookie": await commitSession(session) },
+    });
+  }
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  await authenticator.isAuthenticated(request, {
-    successRedirect: "/",
-  });
   const session = await getSession(request.headers.get("cookie"));
-  const error = session.get(authenticator.sessionErrorKey);
+  if (session.has("user")) {
+    throw redirect("/");
+  }
+  const authError = session.get("authError");
+  session.unset("authError");
   return data(
-    { error },
-    {
-      headers: {
-        "Set-Cookie": await commitSession(session),
-      },
-    },
+    { authError },
+    { headers: { "Set-Cookie": await commitSession(session) } },
   );
 }
 
 export default function SignIn() {
-  const { error } = useLoaderData<typeof loader>();
+  const { authError } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
   const navigation = useNavigation();
+
   return (
-    <div className="mx-auto grid w-full max-w-7xl px-4 py-8 sm:px-8">
+    <div className="grid mx-auto px-4 sm:px-8 py-8 w-full max-w-7xl">
       <Form
         replace
         method="post"
-        className="w-full max-w-80 place-self-center text-center"
+        className="w-full max-w-80 text-center place-self-center"
       >
-        <fieldset className="grid gap-8" disabled={navigation.state !== "idle"}>
-          <h1 className="text-xl font-bold leading-snug sm:text-2xl sm:leading-snug">
+        <fieldset className="gap-8 grid" disabled={navigation.state !== "idle"}>
+          <h1 className="font-bold text-xl sm:text-2xl leading-snug sm:leading-snug">
             Sign in
           </h1>
-          <div className="grid gap-4">
-            <label className="grid gap-2">
+          <div className="gap-4 grid">
+            <label className="gap-2 grid">
               Email
               <input
                 autoComplete="off"
                 type="email"
                 name="email"
                 required
-                className="w-full rounded border border-stone-300 bg-white px-4 py-2 shadow-sm hover:shadow-md active:shadow dark:bg-stone-950"
+                className="border-stone-300 bg-white dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded w-full"
               />
             </label>
-            <label className="grid gap-2">
+            <label className="gap-2 grid">
               Password
               <input
                 type="password"
                 name="password"
                 autoComplete="current-password"
                 required
-                className="w-full rounded border border-stone-300 bg-white px-4 py-2 shadow-sm hover:shadow-md active:shadow dark:bg-stone-950"
+                className="border-stone-300 bg-white dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded w-full"
               />
             </label>
-            {error?.message && <p className="text-red-600">{error.message}</p>}
+            {authError && <p className="text-red-600">{authError}</p>}
           </div>
-          <div className="grid gap-4">
+          <div className="gap-4 grid">
             <button
               type="submit"
-              className="rounded border border-transparent bg-emerald-600 px-4 py-2 text-white shadow-sm hover:shadow-md active:shadow disabled:opacity-50"
+              className="bg-emerald-600 disabled:opacity-50 shadow-sm hover:shadow-md active:shadow px-4 py-2 border border-transparent rounded text-white"
             >
               Sign in
             </button>
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="rounded border border-emerald-600 px-4 py-2 text-emerald-600 shadow-sm hover:shadow-md active:shadow disabled:opacity-50 dark:border-white dark:text-white"
+              className="border-emerald-600 dark:border-white disabled:opacity-50 shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-emerald-600 dark:text-white"
             >
               Back
             </button>

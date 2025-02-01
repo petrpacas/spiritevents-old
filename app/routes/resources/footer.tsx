@@ -1,13 +1,13 @@
-import type { ActionFunctionArgs } from "@remix-run/node";
+import type { ActionFunctionArgs } from "react-router";
 import {
   Form,
   Link,
   useFetcher,
   useLocation,
   useNavigation,
-} from "@remix-run/react";
+} from "react-router";
 import { useEffect, useRef } from "react";
-import { jsonWithError, jsonWithSuccess } from "remix-toast";
+import { dataWithError, dataWithSuccess } from "remix-toast";
 import { inferFlattenedErrors } from "zod";
 import { prisma } from "~/services";
 import { subscriberFormSchema } from "~/validations";
@@ -21,7 +21,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const data = Object.fromEntries(formData);
   const result = await subscriberFormSchema.safeParseAsync(data);
   if (!result.success) {
-    return jsonWithError(
+    return dataWithError(
       { errors: result.error.flatten() },
       "Please fix the errors",
     );
@@ -32,7 +32,7 @@ export async function action({ request }: ActionFunctionArgs) {
     update: { name },
     where: { email },
   });
-  return jsonWithSuccess({ success: true }, "Welcome on board!");
+  return dataWithSuccess({ success: true }, "Welcome on board!");
 }
 
 export const Footer = ({ isAuthenticated }: Props) => {
@@ -58,13 +58,13 @@ export const Footer = ({ isAuthenticated }: Props) => {
   }
   return (
     <footer className="bg-white dark:bg-stone-950">
-      <div className="mx-auto grid w-full max-w-7xl gap-16 px-4 py-8 sm:px-8 sm:py-16">
-        <div className="grid items-start gap-16 xl:grid-cols-3">
-          <div className="grid items-start gap-8 xl:col-span-2 xl:grid-cols-2 xl:gap-x-16">
-            <h3 className="text-2xl leading-snug sm:text-3xl sm:leading-snug xl:col-span-2">
+      <div className="gap-16 grid mx-auto px-4 sm:px-8 py-8 sm:py-16 w-full max-w-7xl">
+        <div className="items-start gap-16 grid xl:grid-cols-3">
+          <div className="items-start gap-8 xl:gap-x-16 grid xl:grid-cols-2 xl:col-span-2">
+            <h3 className="xl:col-span-2 text-2xl sm:text-3xl leading-snug sm:leading-snug">
               🤙 Stay in the <strong>loop</strong>
             </h3>
-            <div className="grid gap-4">
+            <div className="gap-4 grid">
               <p className="text-lg sm:text-xl">
                 Don&apos;t expect to get any email from me anytime soon, but if
                 and when one goes out, it could be really{" "}
@@ -82,14 +82,14 @@ export const Footer = ({ isAuthenticated }: Props) => {
             >
               <fieldset
                 disabled={fetcher.state !== "idle"}
-                className="grid gap-2 self-start sm:max-[839px]:grid-cols-2 min-[840px]:max-xl:grid-cols-3"
+                className="gap-2 grid sm:max-[839px]:grid-cols-2 min-[840px]:max-xl:grid-cols-3 self-start"
               >
                 <input
                   placeholder="Name (optional)"
                   autoComplete="on"
                   type="text"
                   name="name"
-                  className="w-full rounded-lg border-stone-300 py-2 text-lg placeholder-stone-400 shadow-sm hover:shadow-md active:shadow sm:py-4 dark:bg-stone-950 dark:placeholder-stone-500"
+                  className="border-stone-300 dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow py-2 sm:py-4 rounded-lg w-full text-lg placeholder-stone-400 dark:placeholder-stone-500"
                 />
                 <input
                   required
@@ -97,25 +97,25 @@ export const Footer = ({ isAuthenticated }: Props) => {
                   autoComplete="on"
                   type="email"
                   name="email"
-                  className="w-full rounded-lg border-stone-300 py-2 text-lg placeholder-stone-400 shadow-sm hover:shadow-md active:shadow sm:py-4 dark:bg-stone-950 dark:placeholder-stone-500"
+                  className="border-stone-300 dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow py-2 sm:py-4 rounded-lg w-full text-lg placeholder-stone-400 dark:placeholder-stone-500"
                 />
                 {actionData?.errors?.fieldErrors.name && (
-                  <p className="text-center text-red-600 sm:max-[839px]:col-span-2 min-[840px]:max-xl:order-4 min-[840px]:max-xl:col-span-3">
+                  <p className="min-[840px]:max-xl:order-4 sm:max-[839px]:col-span-2 min-[840px]:max-xl:col-span-3 text-center text-red-600">
                     {actionData.errors.fieldErrors.name.join(", ")}
                   </p>
                 )}
                 {actionData?.errors?.fieldErrors.email && (
-                  <p className="text-center text-red-600 sm:max-[839px]:col-span-2 min-[840px]:max-xl:order-4 min-[840px]:max-xl:col-span-3">
+                  <p className="min-[840px]:max-xl:order-4 sm:max-[839px]:col-span-2 min-[840px]:max-xl:col-span-3 text-center text-red-600">
                     {actionData.errors.fieldErrors.email.join(", ")}
                   </p>
                 )}
                 <button
                   type="submit"
-                  className="flex items-center justify-center gap-3 rounded-lg border border-transparent bg-emerald-600 px-4 py-2 text-lg text-white shadow-sm hover:shadow-md active:shadow disabled:opacity-50 sm:py-4 sm:max-[839px]:col-span-2 xl:px-8"
+                  className="flex justify-center items-center gap-3 sm:max-[839px]:col-span-2 bg-emerald-600 disabled:opacity-50 shadow-sm hover:shadow-md active:shadow px-4 xl:px-8 py-2 sm:py-4 border border-transparent rounded-lg text-lg text-white"
                 >
                   Join the mailing list
                   <svg
-                    className="h-6 w-6 max-[339px]:hidden"
+                    className="max-[339px]:hidden w-6 h-6"
                     width="16px"
                     height="16px"
                     xmlns="http://www.w3.org/2000/svg"
@@ -134,16 +134,16 @@ export const Footer = ({ isAuthenticated }: Props) => {
               </fieldset>
             </fetcher.Form>
           </div>
-          <div className="grid gap-8 text-center xl:text-left" id="contacts">
-            <h3 className="text-2xl font-bold leading-snug sm:text-3xl sm:leading-snug">
+          <div className="gap-8 grid text-center xl:text-left" id="contacts">
+            <h3 className="font-bold text-2xl sm:text-3xl leading-snug sm:leading-snug">
               <span className="text-emerald-600">Spirit</span>Events 👋
             </h3>
-            <div className="grid gap-4">
-              <div className="grid gap-2">
+            <div className="gap-4 grid">
+              <div className="gap-2 grid">
                 <div>
                   <a
                     href="mailto:info@spiritevents.cz"
-                    className="break-all text-lg leading-snug text-amber-600 underline sm:text-xl sm:leading-snug"
+                    className="text-amber-600 text-lg sm:text-xl underline break-all leading-snug sm:leading-snug"
                   >
                     info@spiritevents.cz
                   </a>
@@ -151,7 +151,7 @@ export const Footer = ({ isAuthenticated }: Props) => {
                 <div>
                   <a
                     href="https://instagram.com/spiritevents.cz"
-                    className="text-lg leading-snug text-amber-600 underline sm:text-xl sm:leading-snug"
+                    className="text-amber-600 text-lg sm:text-xl underline leading-snug sm:leading-snug"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -161,7 +161,7 @@ export const Footer = ({ isAuthenticated }: Props) => {
                 <div>
                   <a
                     href="https://facebook.com/spiritevents.cz"
-                    className="text-lg leading-snug text-amber-600 underline sm:text-xl sm:leading-snug"
+                    className="text-amber-600 text-lg sm:text-xl underline leading-snug sm:leading-snug"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -175,11 +175,11 @@ export const Footer = ({ isAuthenticated }: Props) => {
                 <button
                   disabled={navigation.state !== "idle"}
                   type="submit"
-                  className="inline-flex items-center gap-3 justify-self-center rounded border border-emerald-600 px-4 py-2 text-sm text-emerald-600 shadow-sm hover:shadow-md active:shadow disabled:opacity-50 xl:justify-self-start dark:border-white dark:text-white"
+                  className="inline-flex justify-self-center xl:justify-self-start items-center gap-3 border-emerald-600 dark:border-white disabled:opacity-50 shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-emerald-600 text-sm dark:text-white"
                 >
                   Admin sign out
                   <svg
-                    className="h-5 w-5"
+                    className="w-5 h-5"
                     width="16px"
                     height="16px"
                     xmlns="http://www.w3.org/2000/svg"
@@ -199,11 +199,11 @@ export const Footer = ({ isAuthenticated }: Props) => {
             ) : (
               <Link
                 to={signInUrl}
-                className="inline-flex items-center gap-3 justify-self-center rounded border border-emerald-600 px-4 py-2 text-sm text-emerald-600 shadow-sm hover:shadow-md active:shadow xl:justify-self-start dark:border-white dark:text-white"
+                className="inline-flex justify-self-center xl:justify-self-start items-center gap-3 border-emerald-600 dark:border-white shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-emerald-600 text-sm dark:text-white"
               >
                 Admin sign in
                 <svg
-                  className="h-5 w-5"
+                  className="w-5 h-5"
                   width="16px"
                   height="16px"
                   xmlns="http://www.w3.org/2000/svg"
@@ -222,7 +222,7 @@ export const Footer = ({ isAuthenticated }: Props) => {
             )}
           </div>
         </div>
-        <div className="grid items-center justify-center gap-8 text-center">
+        <div className="justify-center items-center gap-8 grid text-center">
           <div className="max-[399px]:grid">
             Cover photo 📸 by{" "}
             <a

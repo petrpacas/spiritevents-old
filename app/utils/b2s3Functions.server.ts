@@ -16,6 +16,8 @@ const s3 = new S3Client({
   endpoint: process.env.B2_SERVER_ENDPOINT!,
   forcePathStyle: true,
   region: process.env.B2_SERVER_REGION!,
+  requestChecksumCalculation: "WHEN_REQUIRED",
+  responseChecksumValidation: "WHEN_REQUIRED",
 });
 
 async function updateEventImage(

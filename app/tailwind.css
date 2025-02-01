@@ -23,7 +23,7 @@
   overflow-wrap: anywhere;
 }
 .mdxeditor-toolbar {
-  @apply rounded-b-none rounded-tl-sm rounded-tr-sm bg-stone-100 dark:bg-stone-500 !important;
+  @apply bg-stone-100 dark:bg-stone-500 rounded-b-none rounded-tl-sm rounded-tr-sm !important;
 }
 .mdxeditor-popup-container {
   @apply border-0 shadow-none !important;
@@ -58,17 +58,13 @@ body.overflow-hidden #nprogress .bar {
   right: 0px;
   width: 100px;
   height: 100%;
-  box-shadow:
-    0 0 0.999rem #d97706,
-    0 0 0.666rem #d97706;
+  box-shadow: 0 0 0.999rem #d97706, 0 0 0.666rem #d97706;
   opacity: 1;
   transform: rotate(3deg) translate(0px, -0.666rem);
   transition: all 200ms linear;
 }
 body.overflow-hidden #nprogress .peg {
-  box-shadow:
-    0 0 1.25rem #fffbeb,
-    0 0 0.625rem #fffbeb;
+  box-shadow: 0 0 1.25rem #fffbeb, 0 0 0.625rem #fffbeb;
 }
 #nprogress .spinner {
   display: block;

@@ -2,15 +2,15 @@ import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
   MetaFunction,
-} from "@remix-run/node";
-import { redirect } from "@remix-run/node";
+} from "react-router";
+import { redirect } from "react-router";
 import {
   Form,
   useFetcher,
   useLoaderData,
   useNavigate,
   useNavigation,
-} from "@remix-run/react";
+} from "react-router";
 import { blurhashToCssGradientString } from "@unpic/placeholder";
 import { Image } from "@unpic/react";
 import { Fragment } from "react/jsx-runtime";
@@ -21,14 +21,15 @@ import remarkBreaks from "remark-breaks";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import {
-  jsonWithError,
-  jsonWithSuccess,
+  dataWithError,
+  dataWithSuccess,
   redirectWithSuccess,
 } from "remix-toast";
 import { unified } from "unified";
-import { authenticator, prisma, requireUserSession } from "~/services";
+import { authenticate, prisma, requireUserSession } from "~/services";
 import { EventStatus, getStatusColors } from "~/utils";
 import { deleteFileFromB2 } from "~/utils/b2s3Functions.server";
+import { FormEvent } from "react";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
@@ -64,16 +65,16 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: { status: EventStatus.DRAFT },
         where: { id },
       });
-      return jsonWithSuccess(null, "Event set as a draft");
+      return dataWithSuccess(null, "Event set as a draft");
     case "publish":
       if (!dateStart) {
-        return jsonWithError(null, "Event is missing date info");
+        return dataWithError(null, "Event is missing date info");
       } else {
         await prisma.event.update({
           data: { status: EventStatus.PUBLISHED },
           where: { id },
         });
-        return jsonWithSuccess(null, "Event published");
+        return dataWithSuccess(null, "Event published");
       }
     default:
       break;
@@ -82,7 +83,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
-  const user = await authenticator.isAuthenticated(request);
+  const user = await authenticate(request);
   const isAuthenticated = Boolean(user);
   const id = params.path?.slice(0, 8);
   const dashAndSlug = params.path?.slice(8);
@@ -124,7 +125,7 @@ export default function Event() {
   const navigation = useNavigation();
   const isWorking = fetcher.state !== "idle" || navigation.state !== "idle";
   const [statusLetter] = getStatusColors(event.status);
-  const handlePublishSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handlePublishSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const response = confirm("Do you really want to publish the event?");
     if (!response) {
@@ -143,7 +144,7 @@ export default function Event() {
   return (
     <>
       <div className="bg-emerald-100 dark:bg-black/25">
-        <div className="mx-auto grid w-full max-w-7xl md:flex xl:pr-8">
+        <div className="md:flex grid mx-auto xl:pr-8 w-full max-w-7xl">
           {event.imageKey && (
             <div
               className={`flex bg-black/25 md:order-2 md:w-1/2 ${event.imageKey ? "" : "max-md:hidden"}`}
@@ -160,18 +161,20 @@ export default function Event() {
           <div
             className={`flex px-4 py-8 sm:px-8 ${event.imageKey ? "md:order-1 md:w-1/2" : ""}`}
           >
-            <div className="grid gap-8">
-              <div className="grid gap-2">
-                <h1 className="text-2xl font-bold leading-snug sm:text-3xl sm:leading-snug">
+            <div className="gap-8 grid">
+              <div className="gap-2 grid">
+                <h1 className="font-bold text-2xl sm:text-3xl leading-snug sm:leading-snug">
                   {statusLetter && (
                     <>
-                      <span className="text-amber-600">{statusLetter}</span>{" "}
+                      <span className="text-amber-600">
+                        {statusLetter}
+                      </span>{" "}
                     </>
                   )}
                   {event.title}
                 </h1>
                 {event.categories.length > 0 && (
-                  <div className="flex flex-wrap gap-2 text-lg leading-snug sm:text-xl sm:leading-snug">
+                  <div className="flex flex-wrap gap-2 text-lg sm:text-xl leading-snug sm:leading-snug">
                     {event.categories.map((category, idx) => (
                       <Fragment key={category.id}>
                         {idx !== 0 && <span className="opacity-50">&amp;</span>}
@@ -186,9 +189,9 @@ export default function Event() {
               {(event.linkFbEvent ||
                 event.linkTickets ||
                 event.linkWebsite) && (
-                <div className="flex items-center gap-2 text-lg font-semibold leading-snug text-amber-600 underline max-[319px]:grid sm:text-xl sm:leading-snug">
+                <div className="flex items-center gap-2 max-[319px]:grid font-semibold text-amber-600 text-lg sm:text-xl underline leading-snug sm:leading-snug">
                   <svg
-                    className="h-6 w-6 text-amber-600 sm:h-7 sm:w-7"
+                    className="w-6 sm:w-7 h-6 sm:h-7 text-amber-600"
                     width="16px"
                     height="16px"
                     xmlns="http://www.w3.org/2000/svg"
@@ -235,15 +238,15 @@ export default function Event() {
                 </div>
               )}
 
-              <div className="grid text-lg font-semibold leading-tight sm:text-xl sm:leading-tight">
-                <div className="grid gap-2">
+              <div className="grid font-semibold text-lg sm:text-xl leading-tight sm:leading-tight">
+                <div className="gap-2 grid">
                   {event.dateStart ? (
                     <div
                       className={`grid gap-2 sm:flex ${event.imageKey ? "md:grid xl:flex" : ""}`}
                     >
                       <div className="flex items-center gap-2">
                         <svg
-                          className="h-6 w-6 text-amber-600 sm:h-7 sm:w-7"
+                          className="w-6 sm:w-7 h-6 sm:h-7 text-amber-600"
                           width="16px"
                           height="16px"
                           xmlns="http://www.w3.org/2000/svg"
@@ -263,7 +266,7 @@ export default function Event() {
                       {event.dateEnd && event.dateEnd !== event.dateStart && (
                         <div className="flex items-center gap-2">
                           <svg
-                            className="h-6 w-6 rotate-90 opacity-50 sm:h-7 sm:w-7"
+                            className="opacity-50 w-6 sm:w-7 h-6 sm:h-7 rotate-90"
                             width="16px"
                             height="16px"
                             xmlns="http://www.w3.org/2000/svg"
@@ -288,7 +291,7 @@ export default function Event() {
                   {event.timeStart && (
                     <div className="flex items-center gap-2">
                       <svg
-                        className="h-6 w-6 text-amber-600 sm:h-7 sm:w-7"
+                        className="w-6 sm:w-7 h-6 sm:h-7 text-amber-600"
                         width="16px"
                         height="16px"
                         xmlns="http://www.w3.org/2000/svg"
@@ -307,7 +310,7 @@ export default function Event() {
                       {event.timeEnd && (
                         <>
                           <svg
-                            className="h-6 w-6 rotate-90 opacity-50 sm:h-7 sm:w-7"
+                            className="opacity-50 w-6 sm:w-7 h-6 sm:h-7 rotate-90"
                             width="16px"
                             height="16px"
                             xmlns="http://www.w3.org/2000/svg"
@@ -329,11 +332,11 @@ export default function Event() {
                   )}
                 </div>
               </div>
-              <div className="grid gap-2">
+              <div className="gap-2 grid">
                 {event.location && (
-                  <div className="flex items-center gap-2 text-lg font-semibold leading-snug sm:text-xl sm:leading-snug">
+                  <div className="flex items-center gap-2 font-semibold text-lg sm:text-xl leading-snug sm:leading-snug">
                     <svg
-                      className="h-6 w-6 text-amber-600 sm:h-7 sm:w-7"
+                      className="w-6 sm:w-7 h-6 sm:h-7 text-amber-600"
                       width="16px"
                       height="16px"
                       xmlns="http://www.w3.org/2000/svg"
@@ -359,7 +362,7 @@ export default function Event() {
                 {event.linkLocation && (
                   <div className="flex items-center gap-2">
                     <svg
-                      className="h-6 w-6 text-amber-600 sm:h-7 sm:w-7"
+                      className="w-6 sm:w-7 h-6 sm:h-7 text-amber-600"
                       width="16px"
                       height="16px"
                       xmlns="http://www.w3.org/2000/svg"
@@ -376,7 +379,7 @@ export default function Event() {
                     </svg>
                     <a
                       href={event.linkLocation}
-                      className="text-lg font-semibold leading-snug text-amber-600 underline sm:text-xl sm:leading-snug"
+                      className="font-semibold text-amber-600 text-lg sm:text-xl underline leading-snug sm:leading-snug"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -391,12 +394,12 @@ export default function Event() {
       </div>
       {isAuthenticated && (
         <div className="bg-white dark:bg-stone-950">
-          <div className="flex flex-wrap justify-center gap-4 px-4 py-4 sm:px-8">
+          <div className="flex flex-wrap justify-center gap-4 px-4 sm:px-8 py-4">
             <Form action="edit">
               <button
                 disabled={isWorking}
                 type="submit"
-                className="rounded border border-transparent bg-amber-600 px-4 py-2 text-white shadow-sm hover:shadow-md active:shadow disabled:opacity-50"
+                className="bg-amber-600 disabled:opacity-50 shadow-sm hover:shadow-md active:shadow px-4 py-2 border border-transparent rounded text-white"
               >
                 Edit
               </button>
@@ -418,7 +421,7 @@ export default function Event() {
                   type="submit"
                   name="intent"
                   value="draft"
-                  className="rounded border border-transparent bg-stone-600 px-4 py-2 text-white shadow-sm hover:shadow-md active:shadow disabled:opacity-50"
+                  className="bg-stone-600 disabled:opacity-50 shadow-sm hover:shadow-md active:shadow px-4 py-2 border border-transparent rounded text-white"
                 >
                   Set as draft
                 </button>
@@ -429,7 +432,7 @@ export default function Event() {
                 <button
                   disabled={isWorking}
                   type="submit"
-                  className="rounded border border-transparent bg-emerald-600 px-4 py-2 text-white shadow-sm hover:shadow-md active:shadow disabled:opacity-50"
+                  className="bg-emerald-600 disabled:opacity-50 shadow-sm hover:shadow-md active:shadow px-4 py-2 border border-transparent rounded text-white"
                 >
                   Publish
                 </button>
@@ -454,7 +457,7 @@ export default function Event() {
                 type="submit"
                 name="intent"
                 value="delete"
-                className="rounded border border-transparent bg-red-600 px-4 py-2 text-white shadow-sm hover:shadow-md active:shadow disabled:opacity-50"
+                className="bg-red-600 disabled:opacity-50 shadow-sm hover:shadow-md active:shadow px-4 py-2 border border-transparent rounded text-white"
               >
                 Delete
               </button>
@@ -463,17 +466,17 @@ export default function Event() {
         </div>
       )}
       <div className="flex justify-center">
-        <div className="grid w-full max-w-7xl px-4 pb-16 pt-8 sm:px-8">
-          <div className="grid gap-8">
+        <div className="grid px-4 sm:px-8 pt-8 pb-16 w-full max-w-7xl">
+          <div className="gap-8 grid">
             {event.description && (
               <div
-                className="prose prose-base prose-basic w-full max-w-full sm:prose-lg dark:prose-invert lg:border-r-[2rem] lg:border-dotted lg:border-emerald-100 lg:pr-[15%] xl:pr-[20%] dark:lg:border-black/25"
+                className="lg:border-emerald-100 lg:pr-[15%] xl:pr-[20%] lg:border-r-[2rem] dark:lg:border-black/25 lg:border-dotted w-full max-w-full dark:prose-invert prose prose-base prose-basic sm:prose-lg"
                 dangerouslySetInnerHTML={{
                   __html: event.description,
                 }}
               />
             )}
-            <div className="grid gap-2 text-right text-amber-600 sm:text-lg">
+            <div className="text-right gap-2 grid text-amber-600 sm:text-lg">
               {isAuthenticated ? (
                 <>
                   <span>
@@ -522,7 +525,7 @@ export default function Event() {
                 disabled={isWorking}
                 type="button"
                 onClick={() => navigate(-1)}
-                className="rounded border border-emerald-600 px-4 py-2 text-emerald-600 shadow-sm hover:shadow-md active:shadow disabled:opacity-50 dark:border-white dark:text-white"
+                className="border-emerald-600 dark:border-white disabled:opacity-50 shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-emerald-600 dark:text-white"
               >
                 Back
               </button>

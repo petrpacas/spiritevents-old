@@ -4,7 +4,7 @@ import {
   layout,
   prefix,
   route,
-} from "@remix-run/route-config";
+} from "@react-router/dev/routes";
 
 export default [
   layout("./routes/general/_layout.tsx", [

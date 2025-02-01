@@ -1,5 +1,5 @@
-import type { MetaFunction } from "@remix-run/node";
-import { useNavigate } from "@remix-run/react";
+import type { MetaFunction } from "react-router";
+import { useNavigate } from "react-router";
 import qrImage from "~/images/qr.png";
 
 export const meta: MetaFunction = () => {
@@ -9,11 +9,11 @@ export const meta: MetaFunction = () => {
 export default function HowToSupport() {
   const navigate = useNavigate();
   return (
-    <div className="mx-auto grid w-full max-w-7xl px-4 pb-16 pt-8 sm:px-8">
-      <div className="grid gap-8">
-        <h1 className="flex items-center gap-2 text-3xl font-bold leading-snug sm:text-4xl sm:leading-snug">
+    <div className="grid mx-auto px-4 sm:px-8 pt-8 pb-16 w-full max-w-7xl">
+      <div className="gap-8 grid">
+        <h1 className="flex items-center gap-2 font-bold text-3xl sm:text-4xl leading-snug sm:leading-snug">
           <svg
-            className="h-8 w-8 shrink-0 text-amber-600 max-xl:hidden sm:h-10 sm:w-10"
+            className="max-xl:hidden w-8 sm:w-10 h-8 sm:h-10 text-amber-600 shrink-0"
             width="16px"
             height="16px"
             xmlns="http://www.w3.org/2000/svg"
@@ -38,7 +38,7 @@ export default function HowToSupport() {
           Developing the app and filling in the data is a very time-consuming
           endeavour, and your contribution would be immensely appreciated!
         </p>
-        <h2 className="text-2xl font-bold leading-snug sm:text-3xl sm:leading-snug">
+        <h2 className="font-bold text-2xl sm:text-3xl leading-snug sm:leading-snug">
           How to support?
         </h2>
         <p className="text-lg sm:text-xl">
@@ -54,16 +54,16 @@ export default function HowToSupport() {
         <div>
           <img className="mx-auto" src={qrImage} alt="QR code for donations" />
         </div>
-        <div className="grid gap-4 text-center text-lg sm:text-xl">
-          <div className="grid justify-center gap-2 sm:flex">
+        <div className="gap-4 grid text-center text-lg sm:text-xl">
+          <div className="sm:flex justify-center gap-2 grid">
             <span>Bank account number (CZ):</span>
             <span className="font-bold">210866806/0300</span>
           </div>
-          <div className="grid justify-center gap-2 sm:flex">
+          <div className="sm:flex justify-center gap-2 grid">
             <span>IBAN:</span>
             <span className="font-bold">CZ34 0300 0000 0002 1086 6806</span>
           </div>
-          <div className="grid justify-center gap-2 sm:flex">
+          <div className="sm:flex justify-center gap-2 grid">
             <span>BIC (SWIFT):</span>
             <span className="font-bold">CEKOCZPP</span>
           </div>
@@ -73,7 +73,7 @@ export default function HowToSupport() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="rounded border border-emerald-600 px-4 py-2 text-emerald-600 shadow-sm hover:shadow-md active:shadow disabled:opacity-50 dark:border-white dark:text-white"
+            className="border-emerald-600 dark:border-white disabled:opacity-50 shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-emerald-600 dark:text-white"
           >
             Back
           </button>
