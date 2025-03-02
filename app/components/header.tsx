@@ -24,7 +24,7 @@ export const Header = ({ isAuthenticated, isLanding }: Props) => {
     }
   }, [navigation]);
   const brandName = (
-    <div className="relative z-10 max-[319px]:grid font-bold max-[319px]:text-[1.3125rem] min-[320px]:text-[1.75rem] min-[374px]:text-[2.1815rem] min-[428px]:text-[2.625rem] leading-none">
+    <div className="z-10 relative max-[319px]:grid font-bold max-[319px]:text-[1.3125rem] min-[320px]:text-[1.75rem] min-[374px]:text-[2.1815rem] min-[428px]:text-[2.625rem] leading-none">
       <span className="text-emerald-600">Spirit</span>
       <span>Events</span>
     </div>
@@ -32,7 +32,7 @@ export const Header = ({ isAuthenticated, isLanding }: Props) => {
   return (
     <>
       <header className="bg-white dark:bg-stone-950">
-        <div className="relative flex justify-between items-center mx-auto sm:px-8 p-4 w-full max-w-7xl">
+        <div className="relative flex justify-between items-center mx-auto p-4 sm:px-8 w-full max-w-7xl">
           <Link to="/">{isLanding ? <h1>{brandName}</h1> : brandName}</Link>
           <button
             type="button"
@@ -65,7 +65,7 @@ export const Header = ({ isAuthenticated, isLanding }: Props) => {
           >
             <Link
               to="/events"
-              className="flex max-md:justify-center items-center gap-2 border-emerald-600 bg-emerald-600 shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-white"
+              className="flex max-md:justify-center items-center gap-2 bg-emerald-600 shadow-sm hover:shadow-md active:shadow px-4 py-2 border border-emerald-600 rounded text-white"
             >
               <span>
                 Discover
@@ -86,14 +86,14 @@ export const Header = ({ isAuthenticated, isLanding }: Props) => {
               <>
                 <Link
                   to="/events/new"
-                  className="flex max-md:justify-center items-center gap-2 border-emerald-600 dark:border-white bg-white shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-emerald-600"
+                  className="flex max-md:justify-center items-center gap-2 bg-white shadow-sm hover:shadow-md active:shadow px-4 py-2 border border-emerald-600 dark:border-white rounded text-emerald-600"
                 >
                   <span>
                     New
                     <span className="md:max-lg:sr-only"> event</span>
                   </span>
                   <svg
-                    className="w-6 h-6"
+                    className="w-5 h-5"
                     width="16px"
                     height="16px"
                     xmlns="http://www.w3.org/2000/svg"
@@ -110,8 +110,33 @@ export const Header = ({ isAuthenticated, isLanding }: Props) => {
                   </svg>
                 </Link>
                 <Link
+                  to="/events/scrape"
+                  className="flex max-md:justify-center items-center gap-2 bg-white shadow-sm hover:shadow-md active:shadow px-4 py-2 border border-amber-600 dark:border-white rounded text-amber-600"
+                >
+                  <span>
+                    Scrape
+                    <span className="md:max-lg:sr-only"> event</span>
+                  </span>
+                  <svg
+                    className="w-5 h-5"
+                    width="16px"
+                    height="16px"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+                    />
+                  </svg>
+                </Link>
+                <Link
                   to="/categories"
-                  className="flex max-md:justify-center items-center gap-2 border-sky-600 bg-sky-600 shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-white"
+                  className="flex max-md:justify-center items-center gap-2 bg-sky-600 shadow-sm hover:shadow-md active:shadow px-4 py-2 border border-sky-600 rounded text-white"
                 >
                   <span>Categories</span>
                   <svg
@@ -141,7 +166,7 @@ export const Header = ({ isAuthenticated, isLanding }: Props) => {
               <>
                 <Link
                   to="/events/suggest"
-                  className="flex max-md:justify-center items-center gap-2 border-emerald-600 dark:border-white bg-white shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-emerald-600"
+                  className="flex max-md:justify-center items-center gap-2 bg-white shadow-sm hover:shadow-md active:shadow px-4 py-2 border border-emerald-600 dark:border-white rounded text-emerald-600"
                 >
                   <span>
                     Suggest
@@ -166,7 +191,7 @@ export const Header = ({ isAuthenticated, isLanding }: Props) => {
                 </Link>
                 <Link
                   to="/how-to-support"
-                  className="flex max-md:justify-center items-center gap-2 border-sky-600 bg-sky-600 shadow-sm hover:shadow-md active:shadow px-4 py-2 border rounded text-white"
+                  className="flex max-md:justify-center items-center gap-2 bg-sky-600 shadow-sm hover:shadow-md active:shadow px-4 py-2 border border-sky-600 rounded text-white"
                 >
                   <span>
                     Support

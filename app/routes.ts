@@ -20,6 +20,7 @@ export default [
     ...prefix("events", [
       index("./routes/general/events/index.tsx"),
       route("new", "./routes/general/events/new.tsx"),
+      route("scrape", "./routes/general/events/scrape.tsx"),
       route("suggest", "./routes/general/events/suggest.tsx"),
       route(":path", "./routes/general/events/$path.tsx"),
       route(":path/edit", "./routes/general/events/$path.edit.tsx"),
