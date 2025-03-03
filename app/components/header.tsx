@@ -134,7 +134,7 @@ export const Header = ({ isAuthenticated, isLanding }: Props) => {
                     />
                   </svg>
                 </Link>
-                <Link
+                {/* <Link
                   to="/categories"
                   className="flex max-md:justify-center items-center gap-2 bg-sky-600 shadow-sm hover:shadow-md active:shadow px-4 py-2 border border-sky-600 rounded text-white"
                 >
@@ -160,7 +160,7 @@ export const Header = ({ isAuthenticated, isLanding }: Props) => {
                       d="M6 6h.008v.008H6V6Z"
                     />
                   </svg>
-                </Link>
+                </Link> */}
               </>
             ) : (
               <>

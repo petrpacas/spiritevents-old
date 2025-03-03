@@ -1,55 +1,78 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
-import { Form, useActionData, useNavigate, useNavigation } from "react-router";
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from "react-router";
 import { ApifyClient } from "apify-client";
-import { z } from "zod";
+import { Form, useActionData, useNavigate, useNavigation } from "react-router";
 import { dataWithError, redirectWithSuccess } from "remix-toast";
+import slugify from "slugify";
+import { z } from "zod";
 import { authenticate, prisma, requireUserSession } from "~/services";
 import { EventStatus } from "~/utils";
-import { uploadFileToB2 } from "~/utils/b2s3Functions.server";
+import { uploadFileToB2, moveFileInB2 } from "~/utils/b2s3Functions.server";
 import { generateBlurHash } from "~/utils/imageFunctions.server";
 
-// Define types for Apify's Facebook event data
+export const meta: MetaFunction = () => {
+  return [{ title: "Scrape a Facebook Event ~ SpiritEvents.cz" }];
+};
+
+// Extend slugify to handle special characters consistently
+slugify.extend({
+  "&": "",
+  "|": "",
+  "<": "",
+  ">": "",
+});
+
+// Define types for the Facebook event data from pratikdani/facebook-event-scraper
 interface FacebookEventData {
-  id?: string;
+  event_id?: string;
   url?: string;
-  name?: string;
-  description?: string;
-  startDate?: string;
-  endDate?: string;
-  image?: string;
-  location?: {
-    name?: string;
-    latitude?: number;
-    longitude?: number;
-    city?: string;
-    country?: string;
+  title?: string;
+  description?: {
+    text?: string;
+    hashtags?: {
+      url?: string;
+      value?: string;
+    }[];
+    links?: string[];
   };
-  venue?: {
-    id?: string;
+  event_date?: string;
+  duration?: {
+    time?: number;
+    time_units?: string;
+  };
+  main_image?: string;
+  main_image_downloadable?: string;
+  location?: {
+    address?: string;
+    url?: string | null;
+  };
+  event_by?: {
     name?: string;
     url?: string;
+  }[];
+  hosts?: {
+    name?: string;
+    url?: string;
+    verified?: boolean;
+  }[];
+  people_responded?: number;
+  tickets?: {
+    currency?: string | null;
+    max_price?: number | null;
+    min_price?: number | null;
+    provider?: string | null;
+    url?: string | null;
   };
-  ticketUrl?: string;
-  organizerName?: string;
-  place?: {
-    city?: string;
-    full_address?: string;
-    street?: string;
-    country?: string;
-  };
-  formattedAddress?: string;
-  ticketsInfo?: {
-    buyUrl?: string;
-    price?: string;
-    title?: string;
-    subtitle?: string;
-    ticketProvider?: string;
-  };
-  userStats?: {
-    usersGoing?: number;
-    usersInterested?: number;
-    usersResponded?: number;
-  };
+  suggested_events?: {
+    date?: string;
+    location?: string;
+    name?: string;
+    people_interested?: string;
+    url?: string;
+  }[];
   [key: string]: any;
 }
 
@@ -97,13 +120,12 @@ export async function action({ request }: ActionFunctionArgs) {
 
     // Start the Facebook event scraper
     const input = {
-      startUrls: [{ url: facebookEventUrl }],
-      maxItems: 1,
+      url: facebookEventUrl,
     };
 
     // Run the actor and wait for it to finish
     const run = await apifyClient
-      .actor("apify/facebook-events-scraper")
+      .actor("pratikdani/facebook-event-scraper")
       .call(input);
 
     // Fetch results from the dataset
@@ -134,9 +156,9 @@ export async function action({ request }: ActionFunctionArgs) {
     let imageBlurHash = "";
     let imageUploadResult = null;
 
-    if (eventData.image) {
+    if (eventData.main_image_downloadable) {
       try {
-        const imageResponse = await fetch(eventData.image);
+        const imageResponse = await fetch(eventData.main_image_downloadable);
         const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
 
         // Generate blur hash for the image
@@ -149,147 +171,67 @@ export async function action({ request }: ActionFunctionArgs) {
           imageBlurHash,
         );
       } catch (error) {
-        console.error("Error downloading or uploading image:", error);
+        console.error("Error downloading or processing image:", error);
       }
     }
 
-    // Parse date and time
+    // Extract date and time information
     let dateStart = "";
     let dateEnd = "";
     let timeStart = "";
     let timeEnd = "";
 
-    console.log("Event data dates:", {
-      startDate: eventData.startDate,
-      endDate: eventData.endDate,
-      eventName: eventData.name,
+    try {
+      if (eventData.event_date) {
+        // Parse the event date, which should be ISO formatted
+        const eventDate = new Date(eventData.event_date);
+
+        // Set the start date (YYYY-MM-DD)
+        dateStart = eventDate.toISOString().split("T")[0];
+
+        // Set start time (HH:MM)
+        timeStart = eventDate.toISOString().split("T")[1].substring(0, 5);
+
+        // If duration is available, calculate end date/time
+        if (eventData.duration?.time && eventData.duration?.time_units) {
+          let durationInMinutes = 0;
+
+          // Convert duration to minutes
+          if (eventData.duration.time_units === "min") {
+            durationInMinutes = eventData.duration.time;
+          } else if (eventData.duration.time_units === "hr") {
+            durationInMinutes = eventData.duration.time * 60;
+          }
+
+          // Calculate end date/time
+          const endDate = new Date(
+            eventDate.getTime() + durationInMinutes * 60000,
+          );
+          dateEnd = endDate.toISOString().split("T")[0];
+          timeEnd = endDate.toISOString().split("T")[1].substring(0, 5);
+        } else {
+          // If no duration, set end date/time same as start
+          dateEnd = dateStart;
+          timeEnd = timeStart;
+        }
+      }
+    } catch (error) {
+      console.error("Error parsing event date:", error);
+      console.log("Event date string:", eventData.event_date);
+    }
+
+    // Generate a slug from the event title
+    const slug = slugify(eventData.title || "facebook-event", {
+      lower: true,
+      strict: true,
     });
 
-    if (eventData.startDate && typeof eventData.startDate === "string") {
-      try {
-        const startDate = new Date(eventData.startDate);
-        dateStart = startDate.toISOString().split("T")[0];
-        timeStart = startDate.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        });
-        console.log("Parsed start date/time:", {
-          dateStart,
-          timeStart,
-          original: eventData.startDate,
-        });
-      } catch (error) {
-        console.error("Error parsing start date:", error);
-        // Fallback for date parsing issues
-        if (eventData.startDate.includes("T")) {
-          const parts = eventData.startDate.split("T");
-          dateStart = parts[0];
-          const timePart = parts[1].split("+")[0].split(".")[0].split(":");
-          if (timePart.length >= 2) {
-            timeStart = `${timePart[0]}:${timePart[1]}`;
-          }
-        }
-      }
-    }
-
-    if (eventData.endDate && typeof eventData.endDate === "string") {
-      try {
-        const endDate = new Date(eventData.endDate);
-        dateEnd = endDate.toISOString().split("T")[0];
-        timeEnd = endDate.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        });
-        console.log("Parsed end date/time:", {
-          dateEnd,
-          timeEnd,
-          original: eventData.endDate,
-        });
-      } catch (error) {
-        console.error("Error parsing end date:", error);
-        // Fallback for date parsing issues
-        if (eventData.endDate.includes("T")) {
-          const parts = eventData.endDate.split("T");
-          dateEnd = parts[0];
-          const timePart = parts[1].split("+")[0].split(".")[0].split(":");
-          if (timePart.length >= 2) {
-            timeEnd = `${timePart[0]}:${timePart[1]}`;
-          }
-        }
-      }
-    }
-
-    // Create slug from title
-    const slug = (eventData.name || "Unknown Event")
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, "")
-      .replace(/[\s_-]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-
-    // Generate Google Maps link
+    // Create Google Maps link from location info
     let googleMapsLink = "";
-
-    if (eventData.location?.latitude && eventData.location?.longitude) {
-      // If we have coordinates, create a direct link (most accurate)
-      googleMapsLink = `https://www.google.com/maps?q=${eventData.location.latitude},${eventData.location.longitude}`;
-      console.log("Created Google Maps link from coordinates:", googleMapsLink);
-    } else if (eventData.location?.name || eventData.venue?.name) {
-      // If we only have a name, create a search link with as much context as possible
-      const locationName =
-        eventData.location?.name || eventData.venue?.name || "";
-
-      // Build a more comprehensive search query with all available location info
-      let searchQuery = locationName;
-
-      // Add place name details if available
-      if (eventData.place && typeof eventData.place === "object") {
-        // Check for city
-        if (eventData.place.city) {
-          searchQuery += `, ${eventData.place.city}`;
-        }
-
-        // Check for full address
-        if (eventData.place.full_address) {
-          searchQuery = eventData.place.full_address; // Use full address instead if available
-        }
-        // Check for street address
-        else if (eventData.place.street) {
-          searchQuery += `, ${eventData.place.street}`;
-        }
-
-        // Add country for international context
-        if (eventData.place.country) {
-          searchQuery += `, ${eventData.place.country}`;
-        }
-      }
-
-      // Add city information from location object if available
-      if (
-        eventData.location?.city &&
-        !searchQuery.includes(eventData.location.city)
-      ) {
-        searchQuery += `, ${eventData.location.city}`;
-      }
-
-      // Add country information from location object if available
-      if (
-        eventData.location?.country &&
-        !searchQuery.includes(eventData.location.country)
-      ) {
-        searchQuery += `, ${eventData.location.country}`;
-      }
-
-      // Also check if there's a formatted address in any other location field
-      if (eventData.formattedAddress) {
-        searchQuery = eventData.formattedAddress; // Use full formatted address if available
-      }
-
-      const encodedName = encodeURIComponent(searchQuery);
-      googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodedName}`;
-      console.log("Created enhanced Google Maps search link:", googleMapsLink);
-      console.log("Search query used:", searchQuery);
+    if (eventData.location?.address) {
+      // Create a Google Maps search link using the address
+      const searchQuery = encodeURIComponent(eventData.location.address);
+      googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${searchQuery}`;
     }
 
     // Determine region based on location data
@@ -298,8 +240,10 @@ export async function action({ request }: ActionFunctionArgs) {
     // Check if event is outside Czech Republic
     const isOutsideCzechRepublic = () => {
       // Check country information from various sources
-      const countryFromPlace = eventData.place?.country?.toLowerCase();
-      const countryFromLocation = eventData.location?.country?.toLowerCase();
+      const countryFromPlace = eventData.location?.address
+        ?.split(", ")
+        ?.pop()
+        ?.toLowerCase();
 
       // If country is explicitly specified and is not Czech Republic, mark as international
       if (
@@ -318,22 +262,6 @@ export async function action({ request }: ActionFunctionArgs) {
         return true;
       }
 
-      if (
-        countryFromLocation &&
-        countryFromLocation !== "czech republic" &&
-        countryFromLocation !== "česká republika" &&
-        countryFromLocation !== "česko" &&
-        countryFromLocation !== "czechia" &&
-        countryFromLocation !== "cz" &&
-        countryFromLocation !== "čr"
-      ) {
-        console.log(
-          "Event detected as outside Czech Republic based on location country:",
-          countryFromLocation,
-        );
-        return true;
-      }
-
       return false;
     };
 
@@ -343,12 +271,11 @@ export async function action({ request }: ActionFunctionArgs) {
       console.log("Setting region to: Mimo ČR (international event)");
     } else {
       // Try to determine Czech region based on city
-      const cityFromPlace = eventData.place?.city?.toLowerCase();
-      const cityFromLocation = eventData.location?.city?.toLowerCase();
-      const cityFromAddress = eventData.formattedAddress
-        ?.split(",")[0]
+      const cityFromPlace = eventData.location?.address
+        ?.split(", ")
+        ?.pop()
         ?.toLowerCase();
-      const city = cityFromPlace || cityFromLocation || cityFromAddress;
+      const city = cityFromPlace;
 
       // Map of major Czech cities to their regions
       const cityToRegionMap: Record<string, string> = {
@@ -577,11 +504,11 @@ export async function action({ request }: ActionFunctionArgs) {
     }
 
     // Create the event in the database
-    await prisma.event.create({
+    const event = await prisma.event.create({
       data: {
-        title: eventData.name || "Unknown Event",
-        description: eventData.description || "",
-        location: eventData.location?.name || eventData.venue?.name || "",
+        title: eventData.title || "Unknown Event",
+        description: eventData.description?.text,
+        location: eventData.location?.address || "",
         region: eventRegion,
         dateStart,
         dateEnd,
@@ -590,7 +517,7 @@ export async function action({ request }: ActionFunctionArgs) {
         slug,
         linkFbEvent: facebookEventUrl,
         linkLocation: googleMapsLink,
-        linkWebsite: eventData.ticketUrl || "",
+        linkWebsite: eventData.tickets?.url || "",
         status: EventStatus.DRAFT,
         imageBlurHash: imageBlurHash || "",
         imageId: imageUploadResult?.id || "",
@@ -598,7 +525,15 @@ export async function action({ request }: ActionFunctionArgs) {
       },
     });
 
-    return redirectWithSuccess("/events", "Event scraped successfully!");
+    // Move image from temp folder to events folder if an image was uploaded
+    if (imageUploadResult?.key && imageUploadResult?.id) {
+      await moveFileInB2(imageUploadResult.key, imageUploadResult.id);
+    }
+
+    return redirectWithSuccess(
+      `/events/${event.id}-${event.slug}`,
+      "Event scraped successfully!",
+    );
   } catch (error: any) {
     console.error("Error scraping event:", error);
     return dataWithError(
@@ -637,7 +572,7 @@ export default function ScrapeFacebookEvent() {
               d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
             />
           </svg>
-          <span>Scrape Facebook Event</span>
+          <span>Scrape a Facebook Event</span>
         </h1>
 
         <div className="gap-4 grid">
@@ -648,14 +583,13 @@ export default function ScrapeFacebookEvent() {
                 <span className="text-amber-600">(required)</span>
               </span>
               <input
+                required
                 id="facebookEventUrl"
                 name="facebookEventUrl"
                 type="url"
                 defaultValue={actionData?.fields?.facebookEventUrl || ""}
                 className="dark:bg-stone-950 shadow-sm hover:shadow-md active:shadow px-3 py-2 border-stone-300 rounded w-full placeholder-stone-400 dark:placeholder-stone-500"
                 placeholder="https://www.facebook.com/events/123456789/"
-                aria-invalid={actionData?.error ? true : undefined}
-                aria-describedby="url-error"
               />
               {actionData?.error?.message && (
                 <p id="url-error" className="text-red-600">
